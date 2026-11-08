@@ -1,8 +1,24 @@
 from collections.abc import Iterator
 
+from sqlalchemy import Engine, event
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.config import get_settings
+
+
+def enable_sqlite_foreign_keys(engine: Engine) -> None:
+    """SQLite ignora las claves foráneas salvo que se active en cada conexión.
+
+    Así SQLite (desarrollo y tests) se comporta como PostgreSQL (producción):
+    un pedido de un usuario inexistente se rechaza en vez de guardarse.
+    """
+
+    @event.listens_for(engine, "connect")
+    def _set_pragma(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
 
 settings = get_settings()
 
@@ -14,6 +30,8 @@ _connect_args = (
 )
 
 engine = create_engine(settings.database_url, connect_args=_connect_args)
+if settings.database_url.startswith("sqlite"):
+    enable_sqlite_foreign_keys(engine)
 
 
 def create_db_and_tables() -> None:
