@@ -3,8 +3,11 @@ from app.services.exceptions import (
     InvalidOrderState,
     OrderNotFound,
     ShopError,
+    UserNotFound,
 )
 from app.services.order_service import OrderService
+from app.services.ticket_service import TicketService
+from app.services.user_service import UserService
 
 __all__ = [
     "InvalidInput",
@@ -12,4 +15,7 @@ __all__ = [
     "OrderNotFound",
     "OrderService",
     "ShopError",
+    "TicketService",
+    "UserNotFound",
+    "UserService",
 ]

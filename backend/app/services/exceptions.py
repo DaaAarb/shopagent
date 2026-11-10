@@ -36,5 +36,13 @@ class InvalidOrderState(ShopError):
         )
 
 
+class UserNotFound(ShopError):
+    """El usuario que dice ser quien llama no existe (autenticación simulada)."""
+
+    def __init__(self, user_id: int) -> None:
+        self.user_id = user_id
+        super().__init__(f"Usuario {user_id} no encontrado.")
+
+
 class InvalidInput(ShopError):
     """Los datos recibidos no son válidos (p. ej. una dirección vacía)."""
