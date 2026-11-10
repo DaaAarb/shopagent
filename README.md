@@ -2,7 +2,7 @@
 
 Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de juguetes para perros, que no solo responde: **ejecuta acciones reales** (consultar, cancelar pedidos, cambiar direcciones, abrir tickets) mediante *tool use*, con las reglas de negocio blindadas en el backend.
 
-🚧 En desarrollo · semana 1 de 4
+🚧 En desarrollo · fase 1 de 4 · entrega 17-nov
 
 ## Lo diferencial
 
@@ -13,16 +13,16 @@ Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de
 
 ## Hoja de ruta
 
-- [ ] **Semana 1 — Cimientos sin IA:** modelo de datos, servicios con reglas, API REST, datos de prueba, tests (`v0.1`)
-- [ ] **Semana 2 — El agente:** LLM, 5 herramientas, bucle de tool use, confirmación, permisos, Redis, `/chat` (`v0.2`)
-- [ ] **Semana 3 — Interfaz y robustez:** Streamlit, manejo de errores, tests del agente con LLM simulado (`v0.3`)
-- [ ] **Semana 4 — Producción:** Docker Compose, GitHub Actions, despliegue, *rate limiting*, demo (`v0.4`)
+- [ ] **Fase 1 — Cimientos sin IA** (`v0.1`): catálogo y pedidos con líneas, stock, máquina de estados, *checkout* simulado, API REST, datos de prueba, tests
+- [ ] **Fase 2 — El agente** (`v0.2`): LLM con 5 herramientas, bucle de tool use, confirmación, permisos, historial en Redis, `/chat`
+- [ ] **Fase 3 — La tienda** (`v0.3`): frontend React (catálogo, carrito, pedidos, chat) y visor 3D de los juguetes
+- [ ] **Fase 4 — Producción** (`v0.4`): Docker Compose, GitHub Actions, despliegue, *rate limiting*, demo
 
 ## Arquitectura
 
 ```mermaid
 flowchart TD
-    UI[Interfaz · Streamlit] --> API[API + agente · FastAPI]
+    UI[Interfaz · React] --> API[API + agente · FastAPI]
     API <--> LLM[LLM con tool use]
     API --> R[(Redis · historial)]
     API --> S[Capa de servicios<br/>reglas + permisos]
@@ -33,7 +33,7 @@ flowchart TD
 
 ```
 backend/    API + agente (FastAPI), servicios, modelos, tests y seed
-frontend/   interfaz de chat (Streamlit) · semana 3
+frontend/   tienda y chat (React + Vite) · fase 3
 docs/       devlog y decisiones de diseño (ADR)
 ```
 
