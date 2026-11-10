@@ -29,6 +29,14 @@ flowchart TD
     S --> DB[(Base de datos)]
 ```
 
+### Estructura del repositorio
+
+```
+backend/    API + agente (FastAPI), servicios, modelos, tests y seed
+frontend/   interfaz de chat (Streamlit) · semana 3
+docs/       devlog y decisiones de diseño (ADR)
+```
+
 ## Cómo ejecutarlo
 
 Requisitos: Python 3.14.
@@ -36,6 +44,8 @@ Requisitos: Python 3.14.
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv/bin/activate
+
+cd backend
 pip install -r requirements.txt
 cp .env.example .env
 
