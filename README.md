@@ -55,7 +55,11 @@ pytest
 
 ## Decisiones de diseño
 
-Se documentan como ADR en [`docs/adr/`](docs/adr/).
+Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/adr/):
+
+- [0001 · SQLite en desarrollo, PostgreSQL en producción](docs/adr/0001-sqlite-dev-postgresql-prod.md)
+- [0002 · Capa de servicios como clases con la sesión inyectada](docs/adr/0002-service-layer-as-classes.md)
+- [0003 · Frontend en React en lugar de Streamlit](docs/adr/0003-react-frontend.md)
 
 ## Demo
 
