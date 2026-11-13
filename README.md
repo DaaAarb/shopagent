@@ -26,7 +26,7 @@ flowchart TD
     API <--> LLM[LLM con tool use]
     API --> R[(Redis · historial)]
     API --> S[Capa de servicios<br/>reglas + permisos]
-    S --> DB[(Base de datos)]
+    S --> DB[(PostgreSQL)]
 ```
 
 ### Estructura del repositorio
@@ -39,9 +39,11 @@ docs/       devlog y decisiones de diseño (ADR)
 
 ## Cómo ejecutarlo
 
-Requisitos: Python 3.14.
+Requisitos: Python 3.14 y Docker.
 
 ```bash
+docker compose up -d db            # PostgreSQL 17 en localhost:5433 (crea shopagent y shopagent_test)
+
 python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv/bin/activate
 
@@ -49,8 +51,9 @@ cd backend
 pip install -r requirements.txt
 cp .env.example .env
 
+alembic upgrade head               # crea/actualiza las tablas con las migraciones
 uvicorn app.main:app --reload      # docs en http://localhost:8000/docs
-pytest
+pytest                             # usa la base shopagent_test
 ```
 
 ## Decisiones de diseño
@@ -60,6 +63,7 @@ Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/a
 - [0001 · SQLite en desarrollo, PostgreSQL en producción](docs/adr/0001-sqlite-dev-postgresql-prod.md)
 - [0002 · Capa de servicios como clases con la sesión inyectada](docs/adr/0002-service-layer-as-classes.md)
 - [0003 · Frontend en React en lugar de Streamlit](docs/adr/0003-react-frontend.md)
+- [0004 · PostgreSQL en todos los entornos y migraciones con Alembic](docs/adr/0004-postgresql-y-alembic.md)
 
 ## Demo
 
