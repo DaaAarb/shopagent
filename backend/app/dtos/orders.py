@@ -1,18 +1,10 @@
-"""Esquemas de entrada y salida de la API.
-
-Separados de los modelos de tabla a propósito:
-- Entrada: validan (los modelos table=True no lo hacen). Datos inválidos → 422 automático.
-- Salida: deciden qué campos se exponen; un campo interno nuevo no se filtra por accidente.
-"""
-
 from datetime import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, StringConstraints
 
+from app.dtos.common import NonBlank
 from app.models import Order, OrderStatus
-
-NonBlank = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 # --- Entrada --------------------------------------------------------------------
 
@@ -21,19 +13,7 @@ class AddressUpdate(BaseModel):
     shipping_address: Annotated[NonBlank, StringConstraints(max_length=200)]
 
 
-class TicketCreate(BaseModel):
-    subject: Annotated[NonBlank, StringConstraints(max_length=120)]
-    description: Annotated[NonBlank, StringConstraints(max_length=2000)]
-    order_id: int | None = None
-
-
 # --- Salida ---------------------------------------------------------------------
-
-
-class UserRead(BaseModel):
-    id: int
-    name: str
-    email: str
 
 
 class OrderItemRead(BaseModel):
@@ -52,8 +32,10 @@ class OrderRead(BaseModel):
     items: list[OrderItemRead]
 
     @classmethod
-    def from_order(cls, order: Order) -> "OrderRead":
-        """Construye la respuesta mientras la sesión sigue abierta (carga las líneas)."""
+    def from_entity(cls, order: Order) -> "OrderRead":
+        """Construcción a mano (no `from_attributes`) porque `product_name` no es un
+        atributo de la línea: hay que leerlo de su producto. Se llama dentro del
+        servicio, con la sesión abierta, para que las líneas se puedan cargar."""
         return cls(
             id=order.id,
             status=order.status,
@@ -70,11 +52,3 @@ class OrderRead(BaseModel):
                 for item in order.items
             ],
         )
-
-
-class TicketRead(BaseModel):
-    id: int
-    order_id: int | None
-    subject: str
-    description: str
-    created_at: datetime

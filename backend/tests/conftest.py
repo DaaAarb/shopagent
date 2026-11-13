@@ -167,5 +167,5 @@ def uow(session: Session) -> UnitOfWork:
 
 
 @pytest.fixture
-def order_service(session: Session) -> OrderService:
-    return OrderService(session)
+def order_service(uow: UnitOfWork) -> OrderService:
+    return OrderService(uow)
