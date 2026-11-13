@@ -18,6 +18,7 @@ from app.models import (
     ProductCategory,
     User,
 )
+from app.repositories import UnitOfWork
 from app.services import OrderService
 
 ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
@@ -158,6 +159,11 @@ def make_order(session: Session, ball: Product) -> Callable[..., Order]:
         return order
 
     return _make
+
+
+@pytest.fixture
+def uow(session: Session) -> UnitOfWork:
+    return UnitOfWork(session)
 
 
 @pytest.fixture
