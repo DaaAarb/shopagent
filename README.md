@@ -25,8 +25,9 @@ flowchart TD
     UI[Interfaz · React] --> API[API + agente · FastAPI]
     API <--> LLM[LLM con tool use]
     API --> R[(Redis · historial)]
-    API --> S[Capa de servicios<br/>reglas + permisos]
-    S --> DB[(PostgreSQL)]
+    API -- DTOs --> S[Servicios<br/>reglas + permisos + transacciones]
+    S --> RP[Repositorios + unidad de trabajo<br/>consultas]
+    RP --> DB[(PostgreSQL)]
 ```
 
 ### Estructura del repositorio
@@ -64,6 +65,7 @@ Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/a
 - [0002 · Capa de servicios como clases con la sesión inyectada](docs/adr/0002-service-layer-as-classes.md)
 - [0003 · Frontend en React en lugar de Streamlit](docs/adr/0003-react-frontend.md)
 - [0004 · PostgreSQL en todos los entornos y migraciones con Alembic](docs/adr/0004-postgresql-y-alembic.md)
+- [0005 · Repositorio genérico, unidad de trabajo y DTOs](docs/adr/0005-repository-unit-of-work-dtos.md)
 
 ## Demo
 
