@@ -30,7 +30,9 @@ def as_user(user) -> dict[str, str]:
 
 
 def test_missing_user_header_returns_401(client):
-    assert client.get("/orders").status_code == 401
+    response = client.get("/orders")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Falta la cabecera X-User-Id."}
 
 
 def test_unknown_user_returns_401(client):

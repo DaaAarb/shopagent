@@ -5,8 +5,9 @@ from typing import Annotated
 from fastapi import Depends, Header
 from sqlmodel import Session
 
+from app.api.errors import NotAuthenticated
 from app.db.session import get_session
-from app.services import OrderService, TicketService, UserNotFound, UserService
+from app.services import OrderService, TicketService, UserService
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -21,7 +22,7 @@ def get_current_user_id(
     resto del código recibe un `user_id` ya comprobado y no le importa de dónde sale.
     """
     if x_user_id is None:
-        raise UserNotFound(0)  # → 401 (ver api/errors.py)
+        raise NotAuthenticated()  # → 401 (ver api/errors.py)
     UserService(session).get_user(x_user_id)
     return x_user_id
 
