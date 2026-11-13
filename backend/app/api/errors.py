@@ -15,6 +15,13 @@ from app.services import (
     UserNotFound,
 )
 
+class NotAuthenticated(Exception):
+    """La petición no trae cabecera X-User-Id: no sabemos quién llama (→ 401).
+
+    Es un error de la capa HTTP, no del dominio: por eso no hereda de ShopError.
+    """
+
+
 STATUS_BY_ERROR: dict[type[ShopError], int] = {
     UserNotFound: status.HTTP_401_UNAUTHORIZED,
     OrderNotFound: status.HTTP_404_NOT_FOUND,
@@ -32,5 +39,13 @@ async def _handle_shop_error(_request: Request, exc: Exception) -> JSONResponse:
     return JSONResponse(status_code=status_code, content={"detail": detail})
 
 
+async def _handle_not_authenticated(_request: Request, _exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Falta la cabecera X-User-Id."},
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ShopError, _handle_shop_error)
+    app.add_exception_handler(NotAuthenticated, _handle_not_authenticated)
