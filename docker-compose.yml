@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: shopagent
-      POSTGRES_PASSWORD: shopagent
-      POSTGRES_DB: shopagent
+      POSTGRES_USER: darb
+      POSTGRES_PASSWORD: shopagent123
+      POSTGRES_DB: shopagentPG
     ports:
       # Puerto del host 5433 para no chocar con otro PostgreSQL local en el 5432.
       - "5433:5432"
