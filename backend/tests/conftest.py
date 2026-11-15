@@ -1,10 +1,14 @@
 from collections.abc import Callable, Iterator
+from pathlib import Path
 
 import pytest
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import Engine, text
+from sqlalchemy.exc import OperationalError
+from sqlmodel import Session, create_engine
 
-from app.db.session import enable_sqlite_foreign_keys
+from app.config import get_settings
 from app.models import (
     DogSize,
     Order,
@@ -14,28 +18,62 @@ from app.models import (
     ProductCategory,
     User,
 )
+from app.repositories import UnitOfWork
 from app.services import OrderService
+
+ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+
+
+def alembic_config(connection) -> Config:
+    """Config de Alembic que reutiliza una conexión abierta (ver migrations/env.py)."""
+    config = Config(str(ALEMBIC_INI))
+    config.attributes["connection"] = connection
+    return config
+
+
+@pytest.fixture(scope="session")
+def engine() -> Iterator[Engine]:
+    """Motor contra la BD de tests (TEST_DATABASE_URL), uno para toda la ejecución.
+
+    Al empezar se vacía el esquema y se aplican las migraciones: los tests
+    corren contra el mismo esquema que producción, no contra un create_all.
+    """
+    engine = create_engine(
+        get_settings().test_database_url, connect_args={"connect_timeout": 5}
+    )
+    try:
+        with engine.begin() as connection:
+            connection.execute(text("DROP SCHEMA IF EXISTS public CASCADE"))
+            connection.execute(text("CREATE SCHEMA public"))
+            command.upgrade(alembic_config(connection), "head")
+    except OperationalError as exc:
+        pytest.exit(
+            "No se puede conectar al PostgreSQL de tests "
+            f"({engine.url.render_as_string(hide_password=True)}).\n"
+            "Arráncalo con: docker compose up -d db\n"
+            f"Detalle: {exc.orig}",
+            returncode=1,
+        )
+
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture
-def session() -> Iterator[Session]:
-    """Base de datos SQLite en memoria, nueva y vacía para cada test.
+def session(engine: Engine) -> Iterator[Session]:
+    """Sesión aislada por test: todo lo que haga se deshace al terminar.
 
-    StaticPool reutiliza una única conexión: con SQLite en memoria, cada
-    conexión nueva sería una base de datos distinta (y vacía).
+    Se abre una transacción externa y la sesión trabaja dentro de ella. Con
+    join_transaction_mode="create_savepoint", cada `commit()` de los servicios
+    es solo un SAVEPOINT; al acabar el test se revierte la transacción externa
+    y la BD queda vacía para el siguiente, sin recrear tablas.
     """
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    enable_sqlite_foreign_keys(engine)
-    SQLModel.metadata.create_all(engine)
-
-    with Session(engine) as session:
-        yield session
-
-    engine.dispose()
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
+            yield session
+        if transaction.is_active:
+            transaction.rollback()
 
 
 def _add_user(session: Session, name: str, email: str) -> User:
@@ -124,5 +162,10 @@ def make_order(session: Session, ball: Product) -> Callable[..., Order]:
 
 
 @pytest.fixture
-def order_service(session: Session) -> OrderService:
-    return OrderService(session)
+def uow(session: Session) -> UnitOfWork:
+    return UnitOfWork(session)
+
+
+@pytest.fixture
+def order_service(uow: UnitOfWork) -> OrderService:
+    return OrderService(uow)

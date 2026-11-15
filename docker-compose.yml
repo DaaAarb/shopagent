@@ -1,0 +1,24 @@
+name: shopagent
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: darb
+      POSTGRES_PASSWORD: shopagent123
+      POSTGRES_DB: shopagentPG
+    ports:
+      # Puerto del host 5433 para no chocar con otro PostgreSQL local en el 5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Solo se ejecuta la primera vez (con el volumen vacío): crea shopagent_test.
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopagent -d shopagent"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

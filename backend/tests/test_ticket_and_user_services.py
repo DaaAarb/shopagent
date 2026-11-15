@@ -10,13 +10,13 @@ from app.services import (
 
 
 @pytest.fixture
-def ticket_service(session) -> TicketService:
-    return TicketService(session)
+def ticket_service(uow) -> TicketService:
+    return TicketService(uow)
 
 
 @pytest.fixture
-def user_service(session) -> UserService:
-    return UserService(session)
+def user_service(uow) -> UserService:
+    return UserService(uow)
 
 
 # --- TicketService --------------------------------------------------------------

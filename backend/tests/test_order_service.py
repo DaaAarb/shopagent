@@ -1,5 +1,6 @@
 import pytest
 
+from app.dtos import OrderRead
 from app.models import OrderStatus
 from app.services import InvalidInput, InvalidOrderState, OrderNotFound
 
@@ -128,3 +129,15 @@ def test_cannot_change_address_of_another_users_order(order_service, alice, bob,
 
     unchanged = order_service.get_order(bob.id, bobs_order.id)
     assert unchanged.shipping_address == "Calle Mayor 1, Valencia"
+
+
+# --- Frontera del servicio: solo salen DTOs ---------------------------------------
+
+
+def test_service_returns_dtos_not_orm_entities(order_service, alice, make_order):
+    """Las entidades del ORM no salen de services/: la API y el agente reciben DTOs."""
+    order = make_order(alice)
+
+    assert isinstance(order_service.get_order(alice.id, order.id), OrderRead)
+    assert all(isinstance(o, OrderRead) for o in order_service.list_orders(alice.id))
+    assert isinstance(order_service.cancel_order(alice.id, order.id), OrderRead)

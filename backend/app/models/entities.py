@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 
+from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.enums import DogSize, OrderStatus, ProductCategory
@@ -47,7 +48,7 @@ class Order(SQLModel, table=True):
     # Se guarda (no solo se calcula) para que el histórico no cambie nunca.
     total_cents: int
     shipping_address: str
-    created_at: datetime = Field(default_factory=_utcnow)
+    created_at: datetime = Field(default_factory=_utcnow, sa_type=DateTime(timezone=True))
 
     items: list["OrderItem"] = Relationship(back_populates="order")
 
@@ -76,4 +77,4 @@ class Ticket(SQLModel, table=True):
     order_id: int | None = Field(default=None, foreign_key="order.id")
     subject: str
     description: str
-    created_at: datetime = Field(default_factory=_utcnow)
+    created_at: datetime = Field(default_factory=_utcnow, sa_type=DateTime(timezone=True))
