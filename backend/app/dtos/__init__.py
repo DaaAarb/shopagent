@@ -16,6 +16,7 @@ from app.dtos.orders import (
     OrderLineCreate,
     OrderRead,
 )
+from app.dtos.products import ProductRead
 from app.dtos.tickets import TicketCreate, TicketRead
 from app.dtos.users import UserRead
 
@@ -25,6 +26,7 @@ __all__ = [
     "OrderItemRead",
     "OrderLineCreate",
     "OrderRead",
+    "ProductRead",
     "TicketCreate",
     "TicketRead",
     "UserRead",

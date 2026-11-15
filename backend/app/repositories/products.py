@@ -2,12 +2,20 @@ from collections.abc import Collection
 
 from sqlmodel import col, select
 
-from app.models import Product
+from app.models import Product, ProductCategory
 from app.repositories.base import Repository
 
 
 class ProductRepository(Repository[Product]):
     model = Product
+
+    def list_catalog(self, category: ProductCategory | None = None) -> list[Product]:
+        """Catálogo ordenado por nombre; filtrado por categoría si se indica."""
+        conditions = [Product.category == category] if category is not None else []
+        return self.find(*conditions, order_by=(col(Product.name),))
+
+    def get_by_slug(self, slug: str) -> Product | None:
+        return self.session.exec(select(Product).where(Product.slug == slug)).first()
 
     def lock_by_ids(self, product_ids: Collection[int]) -> list[Product]:
         """Los productos que existan de entre esos ids, BLOQUEADOS para escribir.
