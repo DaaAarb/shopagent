@@ -1,29 +1,12 @@
-"""Tests de la API: HTTP de extremo a extremo contra una BD en memoria.
+"""Tests de la API: HTTP de extremo a extremo contra la BD de tests (PostgreSQL).
 
-`app.dependency_overrides` sustituye `get_session` por la sesión del test:
-inyección de dependencias en acción. Las rutas no cambian; solo lo que reciben.
+La fixture `client` (en conftest.py) inyecta la sesión aislada de cada test.
 """
 
-from collections.abc import Iterator
-
 import pytest
-from fastapi.testclient import TestClient
 
-from app.db.session import get_session
-from app.main import app
 from app.models import OrderStatus
-
-
-@pytest.fixture
-def client(session) -> Iterator[TestClient]:
-    app.dependency_overrides[get_session] = lambda: session
-    # Sin "with": no se ejecuta el lifespan, así que no se toca la BD real.
-    yield TestClient(app)
-    app.dependency_overrides.clear()
-
-
-def as_user(user) -> dict[str, str]:
-    return {"X-User-Id": str(user.id)}
+from tests.helpers import as_user
 
 
 # --- Autenticación simulada ----------------------------------------------------

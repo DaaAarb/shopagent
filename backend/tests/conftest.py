@@ -4,11 +4,14 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi.testclient import TestClient
 from sqlalchemy import Engine, text
 from sqlalchemy.exc import OperationalError
 from sqlmodel import Session, create_engine
 
 from app.config import get_settings
+from app.db.session import get_session
+from app.main import app
 from app.models import (
     DogSize,
     Order,
@@ -159,6 +162,18 @@ def make_order(session: Session, ball: Product) -> Callable[..., Order]:
         return order
 
     return _make
+
+
+@pytest.fixture
+def client(session: Session) -> Iterator[TestClient]:
+    """Cliente HTTP contra la app, usando la sesión aislada del test.
+
+    `app.dependency_overrides` sustituye `get_session` por la sesión del test:
+    inyección de dependencias en acción. Las rutas no cambian; solo lo que reciben.
+    """
+    app.dependency_overrides[get_session] = lambda: session
+    yield TestClient(app)
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

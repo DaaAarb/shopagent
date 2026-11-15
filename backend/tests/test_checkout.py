@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from app.dtos import OrderCreate, OrderLineCreate
 from app.models import OrderStatus
 from app.services import InsufficientStock, ProductNotFound
-from tests.test_api import as_user, client  # noqa: F401  (fixture `client`)
+from tests.helpers import as_user
 
 ADDRESS = "Calle Mayor 1, Valencia"
 
@@ -136,7 +136,7 @@ def test_shipping_address_cannot_be_blank():
 # --- API -------------------------------------------------------------------------
 
 
-def test_post_orders_creates_the_order(client, alice, make_product):  # noqa: F811
+def test_post_orders_creates_the_order(client, alice, make_product):
     ball = make_product(price_cents=649, stock=5)
 
     response = client.post(
@@ -151,7 +151,7 @@ def test_post_orders_creates_the_order(client, alice, make_product):  # noqa: F8
     assert body["total_cents"] == 2 * 649
 
 
-def test_post_orders_without_stock_returns_409(client, alice, make_product):  # noqa: F811
+def test_post_orders_without_stock_returns_409(client, alice, make_product):
     ball = make_product(stock=1)
 
     response = client.post(
@@ -164,7 +164,7 @@ def test_post_orders_without_stock_returns_409(client, alice, make_product):  # 
     assert "Stock insuficiente" in response.json()["detail"]
 
 
-def test_post_orders_with_unknown_product_returns_404(client, alice):  # noqa: F811
+def test_post_orders_with_unknown_product_returns_404(client, alice):
     response = client.post(
         "/orders",
         headers=as_user(alice),
@@ -174,7 +174,7 @@ def test_post_orders_with_unknown_product_returns_404(client, alice):  # noqa: F
     assert response.status_code == 404
 
 
-def test_post_orders_with_empty_cart_returns_422(client, alice):  # noqa: F811
+def test_post_orders_with_empty_cart_returns_422(client, alice):
     response = client.post(
         "/orders",
         headers=as_user(alice),
@@ -184,7 +184,7 @@ def test_post_orders_with_empty_cart_returns_422(client, alice):  # noqa: F811
     assert response.status_code == 422
 
 
-def test_post_orders_requires_user_header(client):  # noqa: F811
+def test_post_orders_requires_user_header(client):
     response = client.post(
         "/orders", json={"items": [{"product_id": 1, "quantity": 1}], "shipping_address": ADDRESS}
     )
