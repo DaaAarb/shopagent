@@ -1,9 +1,15 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from app.api.deps import CurrentUserId, OrderServiceDep
-from app.dtos import AddressUpdate, OrderRead
+from app.dtos import AddressUpdate, OrderCreate, OrderRead
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.post("", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+def create_order(body: OrderCreate, user_id: CurrentUserId, orders: OrderServiceDep):
+    """Checkout simulado: crea el pedido (pending) y descuenta el stock."""
+    return orders.create_order(user_id, body)
 
 
 @router.get("", response_model=list[OrderRead])

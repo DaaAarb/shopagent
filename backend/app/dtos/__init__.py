@@ -9,13 +9,21 @@ de tabla a propósito:
 Los servicios reciben y devuelven DTOs: las entidades del ORM nunca salen de services/.
 """
 
-from app.dtos.orders import AddressUpdate, OrderItemRead, OrderRead
+from app.dtos.orders import (
+    AddressUpdate,
+    OrderCreate,
+    OrderItemRead,
+    OrderLineCreate,
+    OrderRead,
+)
 from app.dtos.tickets import TicketCreate, TicketRead
 from app.dtos.users import UserRead
 
 __all__ = [
     "AddressUpdate",
+    "OrderCreate",
     "OrderItemRead",
+    "OrderLineCreate",
     "OrderRead",
     "TicketCreate",
     "TicketRead",

@@ -1,7 +1,13 @@
-from app.dtos import OrderRead
-from app.models import Order, OrderStatus
+from app.dtos import OrderCreate, OrderRead
+from app.models import Order, OrderItem, OrderStatus
 from app.repositories import UnitOfWork
-from app.services.exceptions import InvalidInput, InvalidOrderState, OrderNotFound
+from app.services.exceptions import (
+    InsufficientStock,
+    InvalidInput,
+    InvalidOrderState,
+    OrderNotFound,
+    ProductNotFound,
+)
 
 
 class OrderService:
@@ -33,6 +39,51 @@ class OrderService:
     def list_orders(self, user_id: int) -> list[OrderRead]:
         """Pedidos del usuario, del más reciente al más antiguo."""
         return [OrderRead.from_entity(o) for o in self.uow.orders.list_for_user(user_id)]
+
+    def create_order(self, user_id: int, data: OrderCreate) -> OrderRead:
+        """Checkout simulado (sin pago): crea el pedido en `pending` y descuenta stock."""
+        # Si el carrito repite un producto, se suman las cantidades: la comprobación
+        # de stock debe ver el total pedido de cada producto, no cada línea suelta.
+        quantities: dict[int, int] = {}
+        for line in data.items:
+            quantities[line.product_id] = quantities.get(line.product_id, 0) + line.quantity
+
+        with self.uow:
+            # Bloquea las filas de esos productos hasta el commit: evita que dos
+            # compras simultáneas vendan la misma última unidad.
+            products = {p.id: p for p in self.uow.products.lock_by_ids(list(quantities))}
+
+            # Primero se comprueba TODO y después se modifica: así el rechazo es
+            # entero (409) y nunca queda un producto descontado sin su pedido.
+            for product_id, quantity in quantities.items():
+                product = products.get(product_id)
+                if product is None:
+                    raise ProductNotFound(product_id)
+                if product.stock < quantity:
+                    raise InsufficientStock(product.name, quantity, product.stock)
+
+            order = Order(
+                user_id=user_id,
+                # Precio copiado del producto ahora: el histórico no cambia si el
+                # catálogo sube de precio mañana. El total sale de las líneas.
+                total_cents=sum(products[pid].price_cents * qty for pid, qty in quantities.items()),
+                shipping_address=data.shipping_address,
+                items=[
+                    OrderItem(
+                        product_id=pid,
+                        quantity=qty,
+                        unit_price_cents=products[pid].price_cents,
+                    )
+                    for pid, qty in quantities.items()
+                ],
+            )
+            for pid, qty in quantities.items():
+                products[pid].stock -= qty
+
+            # Pedido, líneas y stock se guardan en UN commit: todo o nada.
+            self.uow.orders.add(order)
+            self.uow.commit()
+            return OrderRead.from_entity(order)
 
     def cancel_order(self, user_id: int, order_id: int) -> OrderRead:
         with self.uow:
