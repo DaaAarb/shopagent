@@ -19,6 +19,12 @@ class Settings(BaseSettings):
         "postgresql+psycopg://shopagent:shopagent@localhost:5433/shopagent_test"
     )
 
+    # --- Agente ---
+    # Vacía por defecto: la app arranca sin ella (el catálogo y los pedidos funcionan);
+    # solo /chat la necesita. Nunca en el código: va en .env.
+    gemini_api_key: str = ""
+    llm_model: str = "gemini-3.5-flash"
+
 
 @lru_cache
 def get_settings() -> Settings:
