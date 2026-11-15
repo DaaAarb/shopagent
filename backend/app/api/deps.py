@@ -8,7 +8,7 @@ from sqlmodel import Session
 from app.api.errors import NotAuthenticated
 from app.db.session import get_session
 from app.repositories import UnitOfWork
-from app.services import OrderService, TicketService, UserService
+from app.services import OrderService, ProductService, TicketService, UserService
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -44,6 +44,10 @@ def get_order_service(uow: UnitOfWorkDep) -> OrderService:
     return OrderService(uow)
 
 
+def get_product_service(uow: UnitOfWorkDep) -> ProductService:
+    return ProductService(uow)
+
+
 def get_ticket_service(uow: UnitOfWorkDep) -> TicketService:
     return TicketService(uow)
 
@@ -53,5 +57,6 @@ def get_user_service(uow: UnitOfWorkDep) -> UserService:
 
 
 OrderServiceDep = Annotated[OrderService, Depends(get_order_service)]
+ProductServiceDep = Annotated[ProductService, Depends(get_product_service)]
 TicketServiceDep = Annotated[TicketService, Depends(get_ticket_service)]
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]

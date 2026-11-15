@@ -8,12 +8,15 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
 from app.services import (
+    InsufficientStock,
     InvalidInput,
     InvalidOrderState,
     OrderNotFound,
+    ProductNotFound,
     ShopError,
     UserNotFound,
 )
+
 
 class NotAuthenticated(Exception):
     """La petición no trae cabecera X-User-Id: no sabemos quién llama (→ 401).
@@ -25,7 +28,9 @@ class NotAuthenticated(Exception):
 STATUS_BY_ERROR: dict[type[ShopError], int] = {
     UserNotFound: status.HTTP_401_UNAUTHORIZED,
     OrderNotFound: status.HTTP_404_NOT_FOUND,
+    ProductNotFound: status.HTTP_404_NOT_FOUND,
     InvalidOrderState: status.HTTP_409_CONFLICT,
+    InsufficientStock: status.HTTP_409_CONFLICT,
     InvalidInput: status.HTTP_422_UNPROCESSABLE_CONTENT,
 }
 

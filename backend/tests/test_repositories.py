@@ -1,6 +1,7 @@
 """Repositorio genérico y unidad de trabajo."""
 
 import pytest
+from sqlalchemy import event
 
 from app.models import Product, User
 from app.repositories import Repository
@@ -67,3 +68,30 @@ def test_exception_inside_with_block_rolls_back(uow):
         raise RuntimeError("algo falla a mitad de la operación")
 
     assert uow.users.get(user.id) is None
+
+
+# --- ProductRepository: bloqueo de filas en el checkout --------------------------
+
+
+def test_lock_by_ids_returns_existing_products_in_id_order(uow, make_product):
+    second = make_product()
+    first = make_product()
+
+    found = uow.products.lock_by_ids([first.id, second.id, 9999])
+
+    assert [p.id for p in found] == sorted([first.id, second.id])
+
+
+def test_lock_by_ids_uses_select_for_update(uow, make_product):
+    """El SQL enviado a PostgreSQL lleva FOR UPDATE (bloqueo de filas)."""
+    product = make_product()
+    statements: list[str] = []
+
+    connection = uow.session.connection()
+    event.listen(
+        connection, "before_cursor_execute",
+        lambda conn, cursor, sql, *args: statements.append(sql),
+    )
+    uow.products.lock_by_ids([product.id])
+
+    assert any("FOR UPDATE" in sql for sql in statements)

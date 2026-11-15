@@ -36,6 +36,27 @@ class InvalidOrderState(ShopError):
         )
 
 
+class ProductNotFound(ShopError):
+    """El producto pedido no existe en el catálogo."""
+
+    def __init__(self, product_id: int | str) -> None:
+        self.product_id = product_id
+        super().__init__(f"Producto {product_id} no encontrado.")
+
+
+class InsufficientStock(ShopError):
+    """No hay unidades suficientes de un producto: el pedido se rechaza entero."""
+
+    def __init__(self, product_name: str, requested: int, available: int) -> None:
+        self.product_name = product_name
+        self.requested = requested
+        self.available = available
+        super().__init__(
+            f"Stock insuficiente de '{product_name}': "
+            f"pides {requested} y quedan {available}."
+        )
+
+
 class UserNotFound(ShopError):
     """El usuario que dice ser quien llama no existe (autenticación simulada)."""
 

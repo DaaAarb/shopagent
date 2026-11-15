@@ -1,12 +1,27 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints
 
 from app.dtos.common import NonBlank
 from app.models import Order, OrderStatus
 
 # --- Entrada --------------------------------------------------------------------
+
+
+class OrderLineCreate(BaseModel):
+    """Una línea del carrito: qué producto y cuántas unidades."""
+
+    product_id: int = Field(gt=0)
+    # Tope por línea: evita cantidades absurdas (el stock real las rechazaría igual).
+    quantity: int = Field(gt=0, le=99)
+
+
+class OrderCreate(BaseModel):
+    """Checkout: el carrito completo más la dirección de envío."""
+
+    items: list[OrderLineCreate] = Field(min_length=1)
+    shipping_address: Annotated[NonBlank, StringConstraints(max_length=200)]
 
 
 class AddressUpdate(BaseModel):

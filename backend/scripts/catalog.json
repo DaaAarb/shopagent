@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "pelota-rebotona",
+    "name": "Pelota Rebotona",
+    "category": "balls",
+    "description": "Pelota de caucho natural con un bote imprevisible que convierte cualquier paseo en una persecución. Flota en el agua y aguanta mordiscos entusiastas.",
+    "price_cents": 649,
+    "stock": 25,
+    "material": "Caucho natural",
+    "dog_size": "all"
+  },
+  {
+    "slug": "pelota-chirrio",
+    "name": "Pelota Chirrío",
+    "category": "balls",
+    "description": "Pelota blandita con sonido en su interior que chirría a cada mordisco. Pensada para bocas pequeñas y perros que necesitan motivación extra para jugar.",
+    "price_cents": 799,
+    "stock": 18,
+    "material": "Látex",
+    "dog_size": "small"
+  },
+  {
+    "slug": "hueso-roedor",
+    "name": "Hueso Roedor",
+    "category": "chew",
+    "description": "Hueso de nailon reforzado para mordedores intensos. Su textura ayuda a limpiar los dientes mientras el perro se entretiene durante horas.",
+    "price_cents": 999,
+    "stock": 12,
+    "material": "Nailon reforzado",
+    "dog_size": "large"
+  },
+  {
+    "slug": "aro-mordisquitos",
+    "name": "Aro Mordisquitos",
+    "category": "chew",
+    "description": "Aro de caucho blando ideal para cachorros en plena dentición. Alivia las encías y es fácil de agarrar con patas pequeñas.",
+    "price_cents": 849,
+    "stock": 15,
+    "material": "Caucho blando",
+    "dog_size": "small"
+  },
+  {
+    "slug": "cuerda-tira-y-afloja",
+    "name": "Cuerda Tira y Afloja",
+    "category": "rope",
+    "description": "Cuerda trenzada con nudos en los extremos para jugar al tira y afloja. Resistente y lavable, perfecta para perros grandes con mucha energía.",
+    "price_cents": 1199,
+    "stock": 10,
+    "material": "Algodón trenzado",
+    "dog_size": "large"
+  },
+  {
+    "slug": "lobito-de-peluche",
+    "name": "Lobito de Peluche",
+    "category": "plush",
+    "description": "El peluche insignia de Loba Toys: un lobito suave que acompaña a la hora de la siesta. Relleno reciclado y costuras reforzadas.",
+    "price_cents": 1499,
+    "stock": 8,
+    "material": "Felpa con relleno reciclado",
+    "dog_size": "all"
+  },
+  {
+    "slug": "erizo-crujiente",
+    "name": "Erizo Crujiente",
+    "category": "plush",
+    "description": "Erizo de felpa con interior crujiente que suena como una bolsa al morderlo. Un estímulo irresistible para perros pequeños y curiosos.",
+    "price_cents": 1249,
+    "stock": 3,
+    "material": "Felpa con interior crujiente",
+    "dog_size": "small"
+  },
+  {
+    "slug": "cubo-premios",
+    "name": "Cubo Premios",
+    "category": "interactive",
+    "description": "Cubo que suelta golosinas al hacerlo rodar. Estimula la mente, ralentiza la comida y mantiene al perro ocupado cuando está solo en casa.",
+    "price_cents": 1699,
+    "stock": 2,
+    "material": "Plástico apto para alimentos",
+    "dog_size": "all"
+  }
+]
