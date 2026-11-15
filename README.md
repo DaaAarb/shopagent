@@ -53,7 +53,8 @@ pip install -r requirements.txt
 cp .env.example .env
 
 alembic upgrade head               # crea/actualiza las tablas con las migraciones
-uvicorn app.main:app --reload      # docs en http://localhost:8000/docs
+python scripts/seed.py             # BORRA y rellena la BD con datos de Loba Toys (3 clientes, 8 juguetes, 7 pedidos)
+uvicorn app.main:app --reload      # docs en http://localhost:8000/docs (usa X-User-Id: 1, 2 o 3)
 pytest                             # usa la base shopagent_test
 ```
 
