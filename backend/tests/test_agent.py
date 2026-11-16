@@ -12,24 +12,7 @@ from app.agent.llm import LLMResponse, Message, ToolCall
 from app.agent.tools import ToolBox, ToolServices
 from app.models import OrderStatus
 from app.services import TicketService
-
-
-class FakeLLM:
-    def __init__(self, *responses: LLMResponse) -> None:
-        self.responses = list(responses)
-        self.received: list[list[Message]] = []  # historial recibido en cada llamada
-
-    def generate(self, system, history, tools) -> LLMResponse:
-        self.received.append(list(history))
-        return self.responses.pop(0)
-
-
-def says(text: str) -> LLMResponse:
-    return LLMResponse(text=text)
-
-
-def calls(name: str, **arguments) -> LLMResponse:
-    return LLMResponse(tool_calls=[ToolCall(name=name, arguments=arguments)])
+from tests.helpers import FakeLLM, calls, says
 
 
 @pytest.fixture

@@ -4,9 +4,14 @@ Las rutas no tienen try/except: dejan que la excepción suba y este
 manejador global la convierte en la respuesta adecuada.
 """
 
+import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from redis.exceptions import RedisError
 
+from app.agent.agent import NoPendingAction
+from app.agent.llm import LLMError
 from app.services import (
     InsufficientStock,
     InvalidInput,
@@ -16,6 +21,9 @@ from app.services import (
     ShopError,
     UserNotFound,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class NotAuthenticated(Exception):
@@ -51,6 +59,25 @@ async def _handle_not_authenticated(_request: Request, _exc: Exception) -> JSONR
     )
 
 
+async def _handle_no_pending_action(_request: Request, _exc: Exception) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": "No hay ninguna acción pendiente con ese id (ya se resolvió o caducó)."},
+    )
+
+
+async def _handle_agent_unavailable(_request: Request, exc: Exception) -> JSONResponse:
+    # El detalle técnico (Gemini caído, Redis sin arrancar...) va al log, no al cliente.
+    logger.error("Asistente no disponible: %r", exc)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "El asistente no está disponible ahora mismo. Inténtalo en un rato."},
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ShopError, _handle_shop_error)
     app.add_exception_handler(NotAuthenticated, _handle_not_authenticated)
+    app.add_exception_handler(NoPendingAction, _handle_no_pending_action)
+    app.add_exception_handler(LLMError, _handle_agent_unavailable)
+    app.add_exception_handler(RedisError, _handle_agent_unavailable)

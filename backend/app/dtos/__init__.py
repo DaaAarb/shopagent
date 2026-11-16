@@ -9,6 +9,7 @@ de tabla a propósito:
 Los servicios reciben y devuelven DTOs: las entidades del ORM nunca salen de services/.
 """
 
+from app.dtos.chat import ChatConfirm, ChatMessageCreate
 from app.dtos.orders import (
     AddressUpdate,
     OrderCreate,
@@ -22,6 +23,8 @@ from app.dtos.users import UserRead
 
 __all__ = [
     "AddressUpdate",
+    "ChatConfirm",
+    "ChatMessageCreate",
     "OrderCreate",
     "OrderItemRead",
     "OrderLineCreate",

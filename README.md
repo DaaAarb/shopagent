@@ -43,19 +43,19 @@ docs/       devlog y decisiones de diseño (ADR)
 Requisitos: Python 3.14 y Docker.
 
 ```bash
-docker compose up -d db            # PostgreSQL 17 en localhost:5433 (crea shopagent y shopagent_test)
+docker compose up -d db redis      # PostgreSQL 17 en :5433 (shopagent y shopagent_test) y Redis 7 en :6379
 
 python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv/bin/activate
 
 cd backend
 pip install -r requirements.txt
-cp .env.example .env
+cp .env.example .env               # pon tu GEMINI_API_KEY (gratis en aistudio.google.com) para usar /chat
 
 alembic upgrade head               # crea/actualiza las tablas con las migraciones
 python scripts/seed.py             # BORRA y rellena la BD con datos de Loba Toys (3 clientes, 8 juguetes, 7 pedidos)
 uvicorn app.main:app --reload      # docs en http://localhost:8000/docs (usa X-User-Id: 1, 2 o 3)
-pytest                             # usa la base shopagent_test
+pytest                             # usa shopagent_test y un LLM falso: no gasta llamadas a Gemini
 ```
 
 ## Decisiones de diseño
