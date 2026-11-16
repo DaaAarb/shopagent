@@ -1,0 +1,60 @@
+/* Estilos GLOBALES: variables de diseño, elementos base y utilidades.
+   Los estilos de cada componente están en App.css. */
+
+:root {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --text: #2b2420;
+  --muted: #7a6f66;
+  --border: #e8e0d6;
+  --brand: #c2571a;
+  --brand-dark: #9c4413;
+  --ok: #2f7d4f;
+  --warn: #b7791f;
+  --danger: #b42318;
+  --radius: 12px;
+
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+h1, h2, h3 { margin: 0; line-height: 1.2; }
+h3 { font-size: 1rem; }
+p { margin: 0.25rem 0; }
+
+button {
+  font: inherit;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--brand); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+button.primary { background: var(--brand); border-color: var(--brand); color: white; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: var(--brand-dark); }
+button.link { border: none; background: none; color: var(--brand); padding: 0; }
+
+input, select {
+  font: inherit;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.error { color: var(--danger); }
+.page { padding: 2rem; }
+.num { text-align: right; white-space: nowrap; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
+.chip { border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.9rem; }
+.chip.active { background: var(--brand); border-color: var(--brand); color: white; }
