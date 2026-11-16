@@ -2,7 +2,7 @@
 
 Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de juguetes para perros, que no solo responde: **ejecuta acciones reales** (consultar, cancelar pedidos, cambiar direcciones, abrir tickets) mediante *tool use*, con las reglas de negocio blindadas en el backend.
 
-🚧 En desarrollo · fase 2 de 4 · entrega 17-nov
+🚧 En desarrollo · fase 3 de 4 · entrega 17-nov
 
 ## Lo diferencial
 
@@ -14,7 +14,7 @@ Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de
 ## Hoja de ruta
 
 - [x] **Fase 1 — Cimientos sin IA** (`v0.1`): catálogo y pedidos con líneas, stock (con bloqueo de filas), máquina de estados, *checkout* simulado, API REST, datos de prueba, tests
-- [ ] **Fase 2 — El agente** (`v0.2`): LLM con 5 herramientas, bucle de tool use, confirmación, permisos, historial en Redis, `/chat`
+- [x] **Fase 2 — El agente** (`v0.2`): LLM con 5 herramientas, bucle de tool use, confirmación, permisos, historial en Redis, `/chat`
 - [ ] **Fase 3 — La tienda** (`v0.3`): frontend React (catálogo, carrito, pedidos, chat) y visor 3D de los juguetes
 - [ ] **Fase 4 — Producción** (`v0.4`): Docker Compose, GitHub Actions, despliegue, *rate limiting*, demo
 
@@ -67,6 +67,7 @@ Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/a
 - [0003 · Frontend en React en lugar de Streamlit](docs/adr/0003-react-frontend.md)
 - [0004 · PostgreSQL en todos los entornos y migraciones con Alembic](docs/adr/0004-postgresql-y-alembic.md)
 - [0005 · Repositorio genérico, unidad de trabajo y DTOs](docs/adr/0005-repository-unit-of-work-dtos.md)
+- [0006 · Diseño del agente: interfaz de LLM, confirmación en el backend e historial en Redis](docs/adr/0006-diseno-del-agente.md)
 
 ## Demo
 
