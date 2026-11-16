@@ -13,10 +13,11 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://shopagent:shopagent@localhost:5433/shopagent"
+    # Valores por defecto = los del docker-compose.yml (solo para desarrollo local).
+    database_url: str = "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagentPG"
     # Base de datos aparte para los tests: se vacía y se recrea en cada ejecución.
     test_database_url: str = (
-        "postgresql+psycopg://shopagent:shopagent@localhost:5433/shopagent_test"
+        "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagent_test"
     )
 
     # --- Agente ---
