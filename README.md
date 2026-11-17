@@ -40,7 +40,7 @@ docs/       devlog y decisiones de diseño (ADR)
 
 ## Cómo ejecutarlo
 
-Requisitos: Python 3.14 y Docker.
+Requisitos: Python 3.14, Node 20+ y Docker.
 
 ```bash
 docker compose up -d db redis      # PostgreSQL 17 en :5433 (shopagentPG y shopagent_test) y Redis 7 en :6380
@@ -50,12 +50,16 @@ source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv
 
 cd backend
 pip install -r requirements.txt
-cp .env.example .env               # pon tu GEMINI_API_KEY (gratis en aistudio.google.com) para usar /chat
+cp .env.example .env               # rellena SECRET_KEY y GEMINI_API_KEY (gratis en aistudio.google.com)
 
 alembic upgrade head               # crea/actualiza las tablas con las migraciones
-python scripts/seed.py             # BORRA y rellena la BD con datos de Loba Toys (3 clientes, 8 juguetes, 7 pedidos)
-uvicorn app.main:app --reload      # docs en http://localhost:8000/docs (usa X-User-Id: 1, 2 o 3)
+python scripts/seed.py             # BORRA y rellena la BD: 3 clientes (contraseña loba1234), 8 juguetes, 7 pedidos
+uvicorn app.main:app --reload      # API en :8000 (docs en /docs; inicia sesión con POST /auth/login)
 pytest                             # usa shopagent_test y un LLM falso: no gasta llamadas a Gemini
+
+cd ../frontend
+npm install
+npm run dev                        # tienda en http://localhost:5173 (entra con lucia@example.com / loba1234)
 ```
 
 ## Decisiones de diseño
@@ -68,6 +72,7 @@ Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/a
 - [0004 · PostgreSQL en todos los entornos y migraciones con Alembic](docs/adr/0004-postgresql-y-alembic.md)
 - [0005 · Repositorio genérico, unidad de trabajo y DTOs](docs/adr/0005-repository-unit-of-work-dtos.md)
 - [0006 · Diseño del agente: interfaz de LLM, confirmación en el backend e historial en Redis](docs/adr/0006-diseno-del-agente.md)
+- [0007 · Login con contraseña y sesión en cookie httpOnly](docs/adr/0007-login-cookie-httponly.md)
 
 ## Demo
 
