@@ -43,7 +43,7 @@ docs/       devlog y decisiones de diseño (ADR)
 Requisitos: Python 3.14 y Docker.
 
 ```bash
-docker compose up -d db redis      # PostgreSQL 17 en :5433 (shopagentPG y shopagent_test) y Redis 7 en :6379
+docker compose up -d db redis      # PostgreSQL 17 en :5433 (shopagentPG y shopagent_test) y Redis 7 en :6380
 
 python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv/bin/activate

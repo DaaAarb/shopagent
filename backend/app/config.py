@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     llm_model: str = "gemini-3.5-flash"
 
     # Historial del chat (Redis de `docker compose up -d redis`).
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = "redis://localhost:6380/0"
     # La conversación se olvida tras 24 h sin actividad.
     chat_ttl_seconds: int = 24 * 60 * 60
 
