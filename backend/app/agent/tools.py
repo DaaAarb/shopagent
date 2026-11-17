@@ -6,7 +6,7 @@ y este módulo decide qué pasa:
 2. `run`: llama a la capa de servicios, que aplica reglas de negocio y permisos.
 
 El `user_id` NUNCA es un argumento de las herramientas: llega de la sesión
-(X-User-Id). Aunque el modelo sufra prompt injection, no puede actuar como otro usuario.
+(la cookie firmada). Aunque el modelo sufra prompt injection, no puede actuar como otro usuario.
 
 Las herramientas destructivas (cancelar, cambiar dirección) llevan un texto de
 confirmación. El bucle del agente las valida pero NO las ejecuta: las guarda como

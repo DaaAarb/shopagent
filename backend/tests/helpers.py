@@ -1,11 +1,16 @@
 """Utilidades compartidas por los tests (no son fixtures: se importan)."""
 
 from app.agent.llm import LLMResponse, Message, ToolCall
+from app.api.deps import SESSION_COOKIE
+from app.security import create_session_token
 
 
 def as_user(user) -> dict[str, str]:
-    """Cabeceras de la autenticación simulada para actuar como `user`."""
-    return {"X-User-Id": str(user.id)}
+    """Cabeceras para actuar como `user`: la cookie de sesión con un token válido.
+
+    Equivale a haber hecho login, sin pasar por /auth/login en cada test.
+    """
+    return {"Cookie": f"{SESSION_COOKIE}={create_session_token(user.id)}"}
 
 
 class FakeLLM:

@@ -20,6 +20,14 @@ class Settings(BaseSettings):
         "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagent_test"
     )
 
+    # --- Autenticación ---
+    # Firma los tokens de sesión. Sin valor por defecto a propósito: con un secreto
+    # conocido, cualquiera podría fabricar tokens válidos. Va en .env.
+    secret_key: str = ""
+    session_minutes: int = 60
+    # True en producción (HTTPS): la cookie nunca viaja sin cifrar.
+    cookie_secure: bool = False
+
     # --- Agente ---
     # Vacía por defecto: la app arranca sin ella (el catálogo y los pedidos funcionan);
     # solo /chat la necesita. Nunca en el código: va en .env.

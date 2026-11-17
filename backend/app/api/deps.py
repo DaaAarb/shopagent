@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Annotated
 
-from fastapi import Depends, Header
+from fastapi import Cookie, Depends
 from redis import Redis
 from sqlmodel import Session
 
@@ -16,7 +16,8 @@ from app.api.errors import NotAuthenticated
 from app.config import get_settings
 from app.db.session import get_session
 from app.repositories import UnitOfWork
-from app.services import OrderService, ProductService, TicketService, UserService
+from app.security import InvalidToken, read_session_token
+from app.services import AuthService, OrderService, ProductService, TicketService, UserService
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
@@ -30,22 +31,36 @@ def get_uow(session: SessionDep) -> UnitOfWork:
 UnitOfWorkDep = Annotated[UnitOfWork, Depends(get_uow)]
 
 
+SESSION_COOKIE = "session"
+
+
 def get_current_user_id(
     uow: UnitOfWorkDep,
-    x_user_id: Annotated[int | None, Header()] = None,
+    session: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
 ) -> int:
-    """Autenticación SIMULADA: quien llama dice quién es con la cabecera X-User-Id.
+    """Quién llama, según la cookie de sesión (un JWT firmado; ver app/security.py).
 
-    En un sistema real aquí se validaría un token. Lo importante es que el
-    resto del código recibe un `user_id` ya comprobado y no le importa de dónde sale.
+    El resto del backend (servicios, agente) recibe un `user_id` ya comprobado y
+    no sabe de dónde sale: cambiar el mecanismo de sesión solo toca esta función.
     """
-    if x_user_id is None:
+    if session is None:
         raise NotAuthenticated()  # → 401 (ver api/errors.py)
-    UserService(uow).get_user(x_user_id)
-    return x_user_id
+    try:
+        user_id = read_session_token(session)
+    except InvalidToken:
+        raise NotAuthenticated() from None
+    UserService(uow).get_user(user_id)  # el usuario pudo borrarse tras emitir el token
+    return user_id
 
 
 CurrentUserId = Annotated[int, Depends(get_current_user_id)]
+
+
+def get_auth_service(uow: UnitOfWorkDep) -> AuthService:
+    return AuthService(uow)
+
+
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 
 
 def get_order_service(uow: UnitOfWorkDep) -> OrderService:

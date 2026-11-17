@@ -15,11 +15,14 @@ def _utcnow() -> datetime:
 
 
 class User(SQLModel, table=True):
-    """Cliente de Loba Toys. La autenticación es simulada (cabecera X-User-Id)."""
+    """Cliente de Loba Toys."""
 
     id: int | None = Field(default=None, primary_key=True)
     name: str
+    # Siempre en minúsculas (lo normaliza el DTO de entrada): un email, una cuenta.
     email: str = Field(unique=True, index=True)
+    # Hash argon2, nunca la contraseña. Ningún DTO de salida lo expone.
+    password_hash: str
 
 
 class Product(SQLModel, table=True):

@@ -57,8 +57,23 @@ class InsufficientStock(ShopError):
         )
 
 
+class InvalidCredentials(ShopError):
+    """Email o contraseña incorrectos.
+
+    Un único error para los dos casos a propósito: no revela si el email existe.
+    """
+
+    def __init__(self) -> None:
+        super().__init__("Email o contraseña incorrectos.")
+
+
+class EmailAlreadyRegistered(ShopError):
+    def __init__(self) -> None:
+        super().__init__("Ya existe una cuenta con ese email.")
+
+
 class UserNotFound(ShopError):
-    """El usuario que dice ser quien llama no existe (autenticación simulada)."""
+    """El usuario del token ya no existe (p. ej. se borró tras iniciar sesión)."""
 
     def __init__(self, user_id: int) -> None:
         self.user_id = user_id

@@ -13,7 +13,9 @@ from redis.exceptions import RedisError
 from app.agent.agent import NoPendingAction
 from app.agent.llm import LLMError
 from app.services import (
+    EmailAlreadyRegistered,
     InsufficientStock,
+    InvalidCredentials,
     InvalidInput,
     InvalidOrderState,
     OrderNotFound,
@@ -25,9 +27,11 @@ from app.services import (
 
 logger = logging.getLogger(__name__)
 
+NOT_AUTHENTICATED_DETAIL = "No has iniciado sesión o la sesión ha caducado."
+
 
 class NotAuthenticated(Exception):
-    """La petición no trae cabecera X-User-Id: no sabemos quién llama (→ 401).
+    """La petición no trae una sesión válida (sin cookie, manipulada o caducada) → 401.
 
     Es un error de la capa HTTP, no del dominio: por eso no hereda de ShopError.
     """
@@ -35,6 +39,8 @@ class NotAuthenticated(Exception):
 
 STATUS_BY_ERROR: dict[type[ShopError], int] = {
     UserNotFound: status.HTTP_401_UNAUTHORIZED,
+    InvalidCredentials: status.HTTP_401_UNAUTHORIZED,
+    EmailAlreadyRegistered: status.HTTP_409_CONFLICT,
     OrderNotFound: status.HTTP_404_NOT_FOUND,
     ProductNotFound: status.HTTP_404_NOT_FOUND,
     InvalidOrderState: status.HTTP_409_CONFLICT,
@@ -48,14 +54,14 @@ async def _handle_shop_error(_request: Request, exc: Exception) -> JSONResponse:
         (code for error, code in STATUS_BY_ERROR.items() if isinstance(exc, error)),
         status.HTTP_400_BAD_REQUEST,
     )
-    detail = "Usuario no identificado." if isinstance(exc, UserNotFound) else str(exc)
+    detail = NOT_AUTHENTICATED_DETAIL if isinstance(exc, UserNotFound) else str(exc)
     return JSONResponse(status_code=status_code, content={"detail": detail})
 
 
 async def _handle_not_authenticated(_request: Request, _exc: Exception) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        content={"detail": "Falta la cabecera X-User-Id."},
+        content={"detail": NOT_AUTHENTICATED_DETAIL},
     )
 
 

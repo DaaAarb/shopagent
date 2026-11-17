@@ -27,9 +27,14 @@ from app.db.session import engine  # noqa: E402
 from app.dtos import OrderCreate, OrderLineCreate  # noqa: E402
 from app.models import Product, User  # noqa: E402
 from app.repositories import UnitOfWork  # noqa: E402
+from app.security import hash_password  # noqa: E402
 from app.services import OrderService  # noqa: E402
 
 CATALOG_FILE = Path(__file__).with_name("catalog.json")
+
+# Contraseña de TODOS los clientes de prueba. Es pública a propósito (sale en la
+# pantalla de login de la demo): son datos ficticios, nunca cuentas reales.
+DEMO_PASSWORD = "loba1234"
 
 USERS = [
     ("Lucía García", "lucia@example.com", "Calle Mayor 12, 46001 Valencia"),
@@ -79,7 +84,8 @@ def seed() -> None:
     reset_database()
 
     with Session(engine) as session:
-        users = [User(name=name, email=email) for name, email, _ in USERS]
+        password_hash = hash_password(DEMO_PASSWORD)
+        users = [User(name=name, email=email, password_hash=password_hash) for name, email, _ in USERS]
         products = [Product(**item) for item in json.loads(CATALOG_FILE.read_text("utf-8"))]
         session.add_all([*users, *products])
         session.commit()
@@ -103,9 +109,9 @@ def seed() -> None:
                 for step in STEPS[final_status]:
                     getattr(orders, step)(user.id, order.id)
 
-        print("Base de datos de desarrollo lista:")
+        print(f"Base de datos de desarrollo lista (contraseña de todos: {DEMO_PASSWORD}):")
         for user in users:
-            print(f"  X-User-Id: {user.id}  ->  {user.name}")
+            print(f"  {user.email:<22} {user.name}")
         print(f"  {len(products)} productos · {sum(len(o) for o in ORDERS.values())} pedidos")
 
 
