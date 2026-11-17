@@ -53,6 +53,7 @@ input, select {
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
 .error { color: var(--danger); }
+.warning { color: var(--warn); background: #fdf3e1; padding: 0.5rem 0.75rem; border-radius: 8px; }
 .page { padding: 2rem; }
 .num { text-align: right; white-space: nowrap; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }

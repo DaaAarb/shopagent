@@ -1,10 +1,10 @@
 // CONTRATO de autenticación: lo que la app necesita de cualquier sistema de login.
 //
 // Solo tipos, sin implementación (como agent/llm.py en el backend). La app
-// (AuthContext, componentes) depende de esta interfaz y nunca de una
+// (AuthProvider, componentes) depende de esta interfaz y nunca de una
 // implementación concreta:
-//   - hoy:    demoAuthService.ts → elegir un cliente de prueba, cabecera X-User-Id;
-//   - mañana: p. ej. jwtAuthService.ts → POST /auth/login, `Authorization: Bearer …`.
+//   - hoy: cookieAuthService.ts → sesión en cookie httpOnly que gestiona el navegador;
+//   - otra posible: un token en cabecera `Authorization: Bearer …`.
 // Cambiar de una a otra es tocar una línea en main.tsx.
 
 import type { User } from './types'
@@ -21,13 +21,13 @@ export interface RegisterData {
 }
 
 export interface AuthService {
-  /** Recupera la sesión guardada (p. ej. al recargar la página), o null. */
+  /** ¿Hay sesión abierta? (al cargar la página). Devuelve el usuario o null. */
   restoreSession(): Promise<User | null>
   login(credentials: LoginCredentials): Promise<User>
   register(data: RegisterData): Promise<User>
-  logout(): void
-  /** Cabeceras que identifican al usuario en cada petición al backend. */
+  logout(): Promise<void>
+  /** Cabeceras extra para cada petición (vacías si la sesión va en una cookie). */
   getAuthHeaders(): Record<string, string>
-  /** Opcional, solo en la demo: clientes para entrar con un clic. */
-  listDemoUsers?(): Promise<User[]>
+  /** Avisa cuando la sesión deja de ser válida (p. ej. caduca). Devuelve cómo dejar de escuchar. */
+  onSessionExpired(listener: () => void): () => void
 }

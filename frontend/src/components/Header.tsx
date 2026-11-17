@@ -38,7 +38,7 @@ export function Header({ view, onNavigate }: Props) {
       </nav>
       <div className="session">
         <span className="small">{user?.name}</span>
-        <button className="link" onClick={logout}>
+        <button className="link" onClick={() => void logout()}>
           Salir
         </button>
       </div>
