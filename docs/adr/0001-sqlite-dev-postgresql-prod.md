@@ -1,6 +1,6 @@
 # 0001 · SQLite en desarrollo, PostgreSQL en producción
 
-- **Estado:** aceptada
+- **Estado:** sustituida por la [0004](0004-postgresql-y-alembic.md)
 - **Fecha:** 2026-11-08
 
 ## Contexto

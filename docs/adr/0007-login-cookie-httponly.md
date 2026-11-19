@@ -26,4 +26,4 @@ Hasta ahora quien llamaba a la API decía quién era con la cabecera `X-User-Id`
 - Un token emitido no se puede revocar antes de que caduque (el logout borra la cookie del navegador, no invalida el token). Es aceptable con 60 minutos.
 - `SECRET_KEY` pasa a ser obligatoria y secreta: sin ella no se puede iniciar sesión.
 - Los tests generan un token válido con `as_user(user)`, así que los tests existentes no cambiaron. Las pruebas de autenticación están en `test_auth.py`.
-- Queda pendiente limitar los intentos de login (fuerza bruta), que entra en el *rate limiting* de la fase 4.
+- Queda pendiente limitar los intentos de login (fuerza bruta), que se resolverá con *rate limiting*.
