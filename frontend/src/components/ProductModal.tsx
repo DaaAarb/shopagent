@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useCart } from '../hooks/useCart'
 import type { Product } from '../services/types'
-import { CATEGORY_EMOJI, DOG_SIZE_LABELS, formatPrice } from '../utils/format'
+import { CATEGORY_LABELS, DOG_SIZE_LABELS, formatPrice } from '../utils/format'
 
 interface Props {
   product: Product
@@ -74,8 +74,8 @@ export function ProductModal({ product, onClose, onAdded }: Props) {
         <button className="close" onClick={onClose} aria-label="Cerrar">
           ×
         </button>
-        <div className="product-image large" aria-hidden>
-          {CATEGORY_EMOJI[product.category]}
+        <div className={`product-image large cat-${product.category}`} aria-hidden>
+          {CATEGORY_LABELS[product.category]}
         </div>
         <h2>{product.name}</h2>
         <p>{product.description}</p>
