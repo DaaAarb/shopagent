@@ -84,7 +84,7 @@ export function ChatPanel({ onDataChanged }: Props) {
         {messages.length === 0 && (
           <div className="welcome">
             <p>
-              ¡Hola, {firstName}! 🐶 Puedo consultar tus pedidos, cancelarlos, cambiar la dirección o abrir una
+              ¡Hola, {firstName}! Puedo consultar tus pedidos, cancelarlos, cambiar la dirección o abrir una
               incidencia.
             </p>
             {SUGGESTIONS.map((s) => (
