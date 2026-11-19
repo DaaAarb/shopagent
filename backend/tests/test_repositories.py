@@ -47,7 +47,7 @@ def test_list_for_user_returns_only_own_orders_newest_first(uow, alice, bob, mak
 
 
 def test_add_assigns_id_but_rollback_discards_it(uow):
-    user = uow.users.add(User(name="Carol", email="carol@example.com"))
+    user = uow.users.add(User(name="Carol", email="carol@example.com", password_hash=""))
     assert user.id is not None  # flush: la BD ya le ha dado id…
 
     uow.rollback()
@@ -56,7 +56,7 @@ def test_add_assigns_id_but_rollback_discards_it(uow):
 
 
 def test_commit_persists_changes(uow):
-    user = uow.users.add(User(name="Carol", email="carol@example.com"))
+    user = uow.users.add(User(name="Carol", email="carol@example.com", password_hash=""))
     uow.commit()
 
     assert uow.users.get(user.id).email == "carol@example.com"
@@ -64,7 +64,7 @@ def test_commit_persists_changes(uow):
 
 def test_exception_inside_with_block_rolls_back(uow):
     with pytest.raises(RuntimeError), uow:
-        user = uow.users.add(User(name="Carol", email="carol@example.com"))
+        user = uow.users.add(User(name="Carol", email="carol@example.com", password_hash=""))
         raise RuntimeError("algo falla a mitad de la operación")
 
     assert uow.users.get(user.id) is None

@@ -13,11 +13,20 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://shopagent:shopagent@localhost:5433/shopagent"
+    # Valores por defecto = los del docker-compose.yml (solo para desarrollo local).
+    database_url: str = "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagentPG"
     # Base de datos aparte para los tests: se vacía y se recrea en cada ejecución.
     test_database_url: str = (
-        "postgresql+psycopg://shopagent:shopagent@localhost:5433/shopagent_test"
+        "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagent_test"
     )
+
+    # --- Autenticación ---
+    # Firma los tokens de sesión. Sin valor por defecto a propósito: con un secreto
+    # conocido, cualquiera podría fabricar tokens válidos. Va en .env.
+    secret_key: str = ""
+    session_minutes: int = 60
+    # True en producción (HTTPS): la cookie nunca viaja sin cifrar.
+    cookie_secure: bool = False
 
     # --- Agente ---
     # Vacía por defecto: la app arranca sin ella (el catálogo y los pedidos funcionan);
@@ -26,7 +35,7 @@ class Settings(BaseSettings):
     llm_model: str = "gemini-3.5-flash"
 
     # Historial del chat (Redis de `docker compose up -d redis`).
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = "redis://localhost:6380/0"
     # La conversación se olvida tras 24 h sin actividad.
     chat_ttl_seconds: int = 24 * 60 * 60
 

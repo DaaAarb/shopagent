@@ -71,5 +71,3 @@ def test_get_missing_user_raises(user_service):
         user_service.get_user(999)
 
 
-def test_list_users_in_id_order(user_service, alice, bob):
-    assert [u.id for u in user_service.list_users()] == [alice.id, bob.id]

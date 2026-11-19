@@ -6,7 +6,7 @@ from app.models import Order, OrderItem, OrderStatus, Ticket, User
 
 
 def make_user(session: Session, email: str = "ana@example.com") -> User:
-    user = User(name="Ana", email=email)
+    user = User(name="Ana", email=email, password_hash="")
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -50,7 +50,7 @@ def test_order_for_nonexistent_user_is_rejected(session: Session):
 
 def test_user_email_must_be_unique(session: Session):
     make_user(session, email="ana@example.com")
-    session.add(User(name="Otra Ana", email="ana@example.com"))
+    session.add(User(name="Otra Ana", email="ana@example.com", password_hash=""))
 
     with pytest.raises(IntegrityError):
         session.commit()

@@ -4,8 +4,7 @@ from app.services.exceptions import UserNotFound
 
 
 class UserService:
-    """Consulta de usuarios. Con la autenticación simulada, sirve para
-    comprobar que el `X-User-Id` recibido corresponde a alguien real."""
+    """Consulta de usuarios: comprueba que el usuario de la sesión sigue existiendo."""
 
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
@@ -15,7 +14,3 @@ class UserService:
         if user is None:
             raise UserNotFound(user_id)
         return UserRead.model_validate(user)
-
-    def list_users(self) -> list[UserRead]:
-        """Para el selector de usuario de la demo (no habría esto con login real)."""
-        return [UserRead.model_validate(u) for u in self.uow.users.list_all()]

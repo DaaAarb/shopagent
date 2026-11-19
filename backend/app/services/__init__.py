@@ -1,5 +1,8 @@
+from app.services.auth_service import AuthService
 from app.services.exceptions import (
+    EmailAlreadyRegistered,
     InsufficientStock,
+    InvalidCredentials,
     InvalidInput,
     InvalidOrderState,
     OrderNotFound,
@@ -13,7 +16,10 @@ from app.services.ticket_service import TicketService
 from app.services.user_service import UserService
 
 __all__ = [
+    "AuthService",
+    "EmailAlreadyRegistered",
     "InsufficientStock",
+    "InvalidCredentials",
     "InvalidInput",
     "InvalidOrderState",
     "OrderNotFound",

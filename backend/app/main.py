@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.errors import register_exception_handlers
-from app.api.routes import chat, demo, orders, products, tickets, users
+from app.api.routes import auth, chat, demo, orders, products, tickets
 
 # El esquema de la BD lo crean las migraciones (`alembic upgrade head`), no la app.
 app = FastAPI(
@@ -11,7 +11,7 @@ app = FastAPI(
 )
 
 register_exception_handlers(app)
-app.include_router(users.router)
+app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(orders.router)
 app.include_router(tickets.router)

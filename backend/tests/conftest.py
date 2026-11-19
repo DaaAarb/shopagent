@@ -22,9 +22,25 @@ from app.models import (
     User,
 )
 from app.repositories import UnitOfWork
+from app.security import hash_password
 from app.services import OrderService
 
 ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+
+# Contraseña de los usuarios de los tests. Se hashea UNA vez: argon2 es lento a
+# propósito y hacerlo en cada test alargaría mucho la ejecución.
+TEST_PASSWORD = "contraseña-de-prueba"
+TEST_PASSWORD_HASH = hash_password(TEST_PASSWORD)
+
+
+@pytest.fixture(autouse=True)
+def secret_key(monkeypatch):
+    """Clave de firma fija para los tests (autouse: se aplica a todos).
+
+    Los tests no dependen del .env: así pasan igual en local y en CI.
+    `monkeypatch` deshace el cambio al terminar cada test.
+    """
+    monkeypatch.setattr(get_settings(), "secret_key", "clave-solo-para-tests")
 
 
 def alembic_config(connection) -> Config:
@@ -80,7 +96,7 @@ def session(engine: Engine) -> Iterator[Session]:
 
 
 def _add_user(session: Session, name: str, email: str) -> User:
-    user = User(name=name, email=email)
+    user = User(name=name, email=email, password_hash=TEST_PASSWORD_HASH)
     session.add(user)
     session.commit()
     session.refresh(user)

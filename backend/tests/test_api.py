@@ -8,25 +8,7 @@ import pytest
 from app.models import OrderStatus
 from tests.helpers import as_user
 
-
-# --- Autenticación simulada ----------------------------------------------------
-
-
-def test_missing_user_header_returns_401(client):
-    response = client.get("/orders")
-    assert response.status_code == 401
-    assert response.json() == {"detail": "Falta la cabecera X-User-Id."}
-
-
-def test_unknown_user_returns_401(client):
-    assert client.get("/orders", headers={"X-User-Id": "999"}).status_code == 401
-
-
-def test_users_list_is_public_for_the_demo_selector(client, alice, bob):
-    response = client.get("/users")
-
-    assert response.status_code == 200
-    assert [u["name"] for u in response.json()] == ["Alice", "Bob"]
+# La autenticación (login, cookie, tokens) se prueba en test_auth.py.
 
 
 # --- Pedidos ---------------------------------------------------------------------

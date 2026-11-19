@@ -4,7 +4,7 @@ from app.api.deps import ProductServiceDep
 from app.dtos import ProductRead
 from app.models import ProductCategory
 
-# Rutas públicas: no piden X-User-Id (el catálogo lo ve cualquiera).
+# Rutas públicas: no piden sesión (el catálogo lo ve cualquiera).
 router = APIRouter(prefix="/products", tags=["products"])
 
 
