@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApi } from '../hooks/useApi'
 import { productService } from '../services/productService'
 import type { Product, ProductCategory } from '../services/types'
-import { CATEGORY_EMOJI, CATEGORY_LABELS } from '../utils/format'
+import { CATEGORY_LABELS } from '../utils/format'
 import { ProductCard } from './ProductCard'
 import { ProductModal } from './ProductModal'
 
@@ -31,7 +31,7 @@ export function Catalog({ onAdded }: Props) {
         </button>
         {CATEGORIES.map((c) => (
           <button key={c} className={category === c ? 'chip active' : 'chip'} onClick={() => setCategory(c)}>
-            {CATEGORY_EMOJI[c]} {CATEGORY_LABELS[c]}
+            {CATEGORY_LABELS[c]}
           </button>
         ))}
       </div>

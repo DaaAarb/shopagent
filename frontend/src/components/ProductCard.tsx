@@ -1,5 +1,5 @@
 import type { Product } from '../services/types'
-import { CATEGORY_EMOJI, CATEGORY_LABELS, formatPrice } from '../utils/format'
+import { CATEGORY_LABELS, formatPrice } from '../utils/format'
 import { StockBadge } from './StockBadge'
 
 interface Props {
@@ -10,8 +10,9 @@ interface Props {
 export function ProductCard({ product, onOpen }: Props) {
   return (
     <article className="card product">
-      <div className="product-image" aria-hidden>
-        {CATEGORY_EMOJI[product.category]}
+      {/* Hueco de la imagen: sin fotos aún, un relleno de color por categoría con su nombre. */}
+      <div className={`product-image cat-${product.category}`} aria-hidden>
+        {CATEGORY_LABELS[product.category]}
       </div>
       <h3>
         {/* Un botón real: se alcanza con Tab y se abre con Enter o Espacio. Su ::after
@@ -20,9 +21,8 @@ export function ProductCard({ product, onOpen }: Props) {
           {product.name}
         </button>
       </h3>
-      <p className="muted">{CATEGORY_LABELS[product.category]}</p>
       <div className="product-footer">
-        <strong>{formatPrice(product.price_cents)}</strong>
+        <strong className="price">{formatPrice(product.price_cents)}</strong>
         <StockBadge stock={product.stock} />
       </div>
     </article>

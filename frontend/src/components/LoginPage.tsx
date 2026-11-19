@@ -102,7 +102,7 @@ export function LoginPage() {
         {mode === 'login' && (
           <div className="demo-users">
             <p className="muted small">
-              Demo · cuentas de prueba (contraseña <code>{DEMO_PASSWORD}</code>):
+              Cuentas de prueba (contraseña <code>{DEMO_PASSWORD}</code>):
             </p>
             {DEMO_ACCOUNTS.map((account) => (
               <button key={account.email} type="button" className="chip" onClick={() => fillDemoAccount(account.email)}>
