@@ -3,15 +3,23 @@
 
 :root {
   --bg: #faf7f2;
-  --surface: #ffffff;
+  --surface: #fffdf9;
   --text: #2b2420;
   --muted: #7a6f66;
-  --border: #e8e0d6;
-  --brand: #c2571a;
-  --brand-dark: #9c4413;
-  --ok: #2f7d4f;
-  --warn: #b7791f;
+  --border: #e8e0d6; /* separadores decorativos */
+  --field-border: #8a7f75; /* bordes de campos: 3:1 o más contra la superficie */
+  --brand: #b34e14;
+  --brand-dark: #8f3d10;
+  --on-brand: #fffdf9; /* texto sobre el color de marca */
+  --ok: #276b43;
+  --warn: #8a5a12;
   --danger: #b42318;
+  --ok-bg: #e8f3ec;
+  --warn-bg: #fdf3e1;
+  --danger-bg: #fdecea;
+  --brand-tint: #fff8f2;
+  --shadow: rgb(43 36 32 / 0.08);
+  --scrim: rgb(43 36 32 / 0.45);
   --radius: 12px;
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -22,9 +30,12 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); }
-h1, h2, h3 { margin: 0; line-height: 1.2; }
+h1, h2, h3 { margin: 0; line-height: 1.2; text-wrap: balance; }
 h3 { font-size: 1rem; }
 p { margin: 0.25rem 0; }
+
+/* Foco visible para quien navega con teclado: aparece al instante, sin transición. */
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 
 button {
   font: inherit;
@@ -36,15 +47,19 @@ button {
   cursor: pointer;
 }
 button:hover:not(:disabled) { border-color: var(--brand); }
+/* El botón que cubre la tarjeta de producto queda fuera: si se moviera, cambiaría
+   el área clicable mientras se pulsa. */
+button:active:not(:disabled, .product-open) { transform: translateY(1px); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
-button.primary { background: var(--brand); border-color: var(--brand); color: white; font-weight: 600; }
-button.primary:hover:not(:disabled) { background: var(--brand-dark); }
-button.link { border: none; background: none; color: var(--brand); padding: 0; }
+button.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: 600; }
+button.primary:hover:not(:disabled), button.primary:active:not(:disabled) { background: var(--brand-dark); }
+/* Enlace con aspecto de texto, pero con una zona de pulsación de 44px de alto. */
+button.link { border: none; background: none; color: var(--brand); padding: 0 0.25rem; min-height: 44px; }
 
 input, select {
   font: inherit;
   padding: 0.5rem 0.7rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--field-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
@@ -53,9 +68,9 @@ input, select {
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
 .error { color: var(--danger); }
-.warning { color: var(--warn); background: #fdf3e1; padding: 0.5rem 0.75rem; border-radius: 8px; }
+.warning { color: var(--warn); background: var(--warn-bg); padding: 0.5rem 0.75rem; border-radius: 8px; }
 .page { padding: 2rem; }
 .num { text-align: right; white-space: nowrap; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
 .chip { border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.9rem; }
-.chip.active { background: var(--brand); border-color: var(--brand); color: white; }
+.chip.active { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
