@@ -22,9 +22,10 @@ export function Orders({ refreshKey }: Props) {
             <h3>Pedido #{order.id}</h3>
             <span className={`status ${order.status}`}>{STATUS_LABELS[order.status]}</span>
           </header>
-          <p className="muted small">
-            {formatDate(order.created_at)} · {order.shipping_address}
-          </p>
+          <div className="order-meta muted small">
+            <span>{formatDate(order.created_at)}</span>
+            <span>{order.shipping_address}</span>
+          </div>
           <ul>
             {order.items.map((item) => (
               <li key={item.product_id}>
@@ -38,7 +39,7 @@ export function Orders({ refreshKey }: Props) {
           </p>
         </article>
       ))}
-      <p className="muted small">¿Quieres cancelar un pedido o cambiar la dirección? Pídeselo al asistente 💬</p>
+      <p className="muted small">¿Quieres cancelar un pedido o cambiar la dirección? Pídeselo al asistente.</p>
     </section>
   )
 }

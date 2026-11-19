@@ -15,7 +15,7 @@ export function Cart({ onOrdered }: Props) {
   const [sending, setSending] = useState(false)
 
   if (cart.lines.length === 0) {
-    return <p className="muted">El carrito está vacío. Echa un vistazo al catálogo 🐾</p>
+    return <p className="muted">El carrito está vacío. Echa un vistazo al catálogo.</p>
   }
 
   async function checkout(event: FormEvent) {

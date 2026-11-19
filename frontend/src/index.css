@@ -1,61 +1,134 @@
 /* Estilos GLOBALES: variables de diseño, elementos base y utilidades.
-   Los estilos de cada componente están en App.css. */
+   Los estilos de cada componente están en App.css.
+
+   Tema "Sticker": papel crema, tinta casi negra y rellenos rosa y lima. Todo el
+   color sale de las variables de abajo; el resto de archivos solo usa var(--…). */
 
 :root {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --text: #2b2420;
-  --muted: #7a6f66;
-  --border: #e8e0d6;
-  --brand: #c2571a;
-  --brand-dark: #9c4413;
-  --ok: #2f7d4f;
-  --warn: #b7791f;
-  --danger: #b42318;
-  --radius: 12px;
+  /* Papel y tinta */
+  --paper: oklch(95.7% 0.013 82);
+  --paper-2: oklch(92.8% 0.021 79);
+  --paper-3: oklch(99.4% 0.007 89);
+  --ink: oklch(21% 0.011 81);
+  --ink-2: oklch(30% 0.013 78);
+  --muted: oklch(50% 0.017 64);
+  --rule: oklch(89.7% 0.02 80);
+  --white: oklch(99.5% 0.003 82);
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Rellenos: el rosa actúa (comprar, precios), el lima marca (etiquetas, contadores) */
+  --accent: oklch(56% 0.225 2);
+  --accent-deep: oklch(49% 0.205 2);
+  --accent-2: oklch(87.6% 0.179 119);
+  --on-accent: var(--white);
+
+  /* Errores: único color funcional fuera del tema */
+  --danger: oklch(46% 0.18 28);
+  --danger-bg: oklch(93% 0.045 25);
+
+  --scrim: oklch(21% 0.011 81 / 0.55);
+
+  /* Tipografía */
+  --font-display: 'Bowlby One SC', 'Arial Black', sans-serif;
+  --font-body: 'Sofia Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* Formas y profundidad: la sombra es siempre un desplazamiento duro, sin desenfoque */
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --shadow-card: 5px 6px 0 var(--ink);
+  --shadow-press: 1px 1px 0 var(--ink);
+  --ring: 0 0 0 5px var(--white);
+  --dur-micro: 0.15s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  font-family: var(--font-body);
   line-height: 1.5;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--ink);
+  background: var(--paper);
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); }
-h1, h2, h3 { margin: 0; line-height: 1.2; }
-h3 { font-size: 1rem; }
+body { margin: 0; background: var(--paper); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); font-weight: 400; letter-spacing: 0.005em; line-height: 1.05; text-wrap: balance; }
+h3 { font-size: 1.05rem; }
 p { margin: 0.25rem 0; }
+::selection { background: var(--accent-2); color: var(--ink); }
 
+/* Foco visible para quien navega con teclado: aparece al instante, sin transición. */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* --- Botones: el secundario es una píldora con borde de tinta --- */
 button {
   font: inherit;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 0.5rem 0.9rem;
+  font-weight: 600;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 2px var(--ink);
+  padding: 0.4rem 1.1rem;
   cursor: pointer;
 }
-button:hover:not(:disabled) { border-color: var(--brand); }
+/* El botón que cubre la tarjeta de producto queda fuera de los estados de hover y de pulsación:
+   no debe cambiar de fondo ni moverse (si se moviera, cambiaría el área clicable mientras se pulsa). */
+button:hover:not(:disabled, .product-open) { background: var(--paper-2); }
+button:active:not(:disabled, .product-open) { translate: 1px 1px; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
-button.primary { background: var(--brand); border-color: var(--brand); color: white; font-weight: 600; }
-button.primary:hover:not(:disabled) { background: var(--brand-dark); }
-button.link { border: none; background: none; color: var(--brand); padding: 0; }
+
+/* El principal: rosa, con anillo blanco y sombra dura; al pulsar se hunde en ella. */
+button.primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  box-shadow: var(--ring), var(--shadow-card);
+  transition: translate var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+}
+button.primary:hover:not(:disabled) { background: var(--accent-deep); }
+button.primary:active:not(:disabled) { translate: 4px 5px; box-shadow: var(--ring), var(--shadow-press); }
+button.primary:focus-visible { outline-offset: 9px; }
+
+/* Enlace: tinta con subrayado fino; al pasar el ratón, el subrayado se vuelve rosa. */
+button.link {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0 0.25rem;
+  min-height: 44px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+button.link:hover:not(:disabled) { background: none; text-decoration-color: var(--accent); text-decoration-thickness: 2px; }
 
 input, select {
   font: inherit;
-  padding: 0.5rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
+  padding: 0.5rem 0.8rem;
+  min-height: 40px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  color: var(--ink);
 }
+input::placeholder { color: var(--muted); }
 
 .muted { color: var(--muted); }
 .small { font-size: 0.85rem; }
 .error { color: var(--danger); }
-.warning { color: var(--warn); background: #fdf3e1; padding: 0.5rem 0.75rem; border-radius: 8px; }
+.warning { color: var(--ink); background: var(--accent-2); padding: 0.5rem 0.9rem; border-radius: var(--radius-card); font-weight: 600; }
 .page { padding: 2rem; }
 .num { text-align: right; white-space: nowrap; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; }
-.chip { border-radius: 999px; padding: 0.35rem 0.85rem; font-size: 0.9rem; }
-.chip.active { background: var(--brand); border-color: var(--brand); color: white; }
+
+/* La pegatina: borde blanco recortado sobre una sombra dura. */
+.card {
+  background: var(--paper-3);
+  border: 6px solid var(--white);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 0.75rem 0.9rem;
+}
+
+/* Filtros: píldoras con borde de tinta; la elegida se rellena de tinta. */
+.chip { padding: 0.25rem 0.9rem; font-size: 0.9rem; min-height: 36px; }
+.chip.active { background: var(--ink); color: var(--paper); }
+.chip.active:hover:not(:disabled) { background: var(--ink-2); }

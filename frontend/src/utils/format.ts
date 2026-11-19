@@ -17,14 +17,6 @@ export const CATEGORY_LABELS: Record<ProductCategory, string> = {
   interactive: 'Interactivos',
 }
 
-export const CATEGORY_EMOJI: Record<ProductCategory, string> = {
-  balls: '🎾',
-  chew: '🦴',
-  rope: '🪢',
-  plush: '🧸',
-  interactive: '🧩',
-}
-
 export const DOG_SIZE_LABELS: Record<DogSize, string> = {
   small: 'Perros pequeños',
   medium: 'Perros medianos',

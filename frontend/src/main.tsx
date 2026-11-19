@@ -1,3 +1,8 @@
+// Fuentes servidas desde el propio proyecto (no desde Google): titulares y precios, y texto.
+import '@fontsource/bowlby-one-sc/400.css'
+import '@fontsource/sofia-sans/400.css'
+import '@fontsource/sofia-sans/600.css'
+import '@fontsource/sofia-sans/700.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'

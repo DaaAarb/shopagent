@@ -27,7 +27,8 @@ export function ChatPanel({ onDataChanged }: Props) {
 
   // Baja hasta el último mensaje cada vez que llega uno.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    endRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
   }, [messages, busy])
 
   const add = (message: ChatMessage) => setMessages((prev) => [...prev, message])
@@ -78,11 +79,12 @@ export function ChatPanel({ onDataChanged }: Props) {
         <span className="muted small">Consulta, cancela o cambia tus pedidos</span>
       </header>
 
-      <div className="messages">
+      {/* role="log": los lectores de pantalla anuncian cada mensaje nuevo sin interrumpir. */}
+      <div className="messages" role="log" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="welcome">
             <p>
-              ¡Hola, {firstName}! 🐶 Puedo consultar tus pedidos, cancelarlos, cambiar la dirección o abrir una
+              ¡Hola, {firstName}! Puedo consultar tus pedidos, cancelarlos, cambiar la dirección o abrir una
               incidencia.
             </p>
             {SUGGESTIONS.map((s) => (
