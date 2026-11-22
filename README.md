@@ -2,7 +2,7 @@
 
 Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de juguetes para perros, que no solo responde: **ejecuta acciones reales** (consultar y cancelar pedidos, cambiar direcciones, abrir tickets) mediante *tool use*, con las reglas de negocio blindadas en el backend.
 
-*Última actualización: 17-nov-2026*
+*Última actualización: 22-nov-2026*
 
 ## La idea
 
@@ -41,6 +41,9 @@ El reto no es que el LLM llame a funciones, sino hacerlo **de forma segura**: un
 - "Mis pedidos" con su estado.
 - Chat con el agente en un panel lateral, con botones para confirmar o rechazar acciones; los pedidos se refrescan solos tras una acción confirmada.
 - Pantalla de login y registro.
+- **Diseño propio:** un sistema visual con variables CSS (papel crema, tinta y rellenos rosa y lima), tarjetas tipo pegatina, fuentes servidas desde el propio proyecto y un bloque de color por categoría como imagen de producto.
+- **Accesible:** navegación completa con teclado (tarjetas de producto, modal con Escape y foco retenido), foco visible, contraste AA en el texto, mensajes del chat anunciados a lectores de pantalla y respeto de `prefers-reduced-motion`.
+- **Adaptada a móvil:** en pantallas estrechas el chat pasa debajo de la tienda.
 
 ### Calidad
 - **182 tests** con pytest (servicios, API, autenticación, herramientas y bucle del agente). Los tests usan un LLM falso: no gastan llamadas reales.
@@ -115,3 +118,4 @@ Se documentan como ADR (*Architecture Decision Records*) en [`docs/adr/`](docs/a
 - [0005 · Repositorio genérico, unidad de trabajo y DTOs](docs/adr/0005-repository-unit-of-work-dtos.md)
 - [0006 · Diseño del agente: interfaz de LLM, confirmación en el backend e historial en Redis](docs/adr/0006-diseno-del-agente.md)
 - [0007 · Login con contraseña y sesión en cookie httpOnly](docs/adr/0007-login-cookie-httponly.md)
+- [0008 · Sistema visual con variables CSS y fuentes servidas desde el proyecto](docs/adr/0008-sistema-visual-y-fuentes-propias.md)
