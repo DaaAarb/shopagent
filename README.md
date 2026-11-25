@@ -1,8 +1,10 @@
 # ShopAgent
 
+[![CI](https://github.com/DaaAarb/shopagent/actions/workflows/ci.yml/badge.svg)](https://github.com/DaaAarb/shopagent/actions/workflows/ci.yml)
+
 Agente de atención al cliente para **Loba Toys**, una tienda online ficticia de juguetes para perros, que no solo responde: **ejecuta acciones reales** (consultar y cancelar pedidos, cambiar direcciones, abrir tickets) mediante *tool use*, con las reglas de negocio blindadas en el backend.
 
-*Última actualización: 22-nov-2026*
+*Última actualización: 25-nov-2026*
 
 ## La idea
 
@@ -48,6 +50,7 @@ El reto no es que el LLM llame a funciones, sino hacerlo **de forma segura**: un
 ### Calidad
 - **182 tests** con pytest (servicios, API, autenticación, herramientas y bucle del agente). Los tests usan un LLM falso: no gastan llamadas reales.
 - PostgreSQL en todos los entornos (también en los tests) y migraciones con Alembic.
+- **Integración continua** con GitHub Actions: en cada *pull request* se ejecutan lint (ruff) y tests del backend contra PostgreSQL y Redis reales, y lint y *build* (con comprobación de tipos) del frontend.
 
 ## Arquitectura
 
