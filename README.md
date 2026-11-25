@@ -94,7 +94,7 @@ python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) · en Linux/macOS: .venv/bin/activate
 
 cd backend
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # ejecución + tests y lint
 cp .env.example .env               # rellena SECRET_KEY y GEMINI_API_KEY (gratis en aistudio.google.com)
 
 alembic upgrade head               # crea/actualiza las tablas con las migraciones

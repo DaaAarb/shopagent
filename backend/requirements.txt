@@ -1,4 +1,5 @@
-# --- Runtime ---
+# Dependencias de ejecución (las que lleva la imagen de producción).
+# Para desarrollar y testear: requirements-dev.txt.
 fastapi==0.162.2
 uvicorn[standard]==0.54.0
 sqlmodel==0.0.48
@@ -9,8 +10,3 @@ google-genai==3.3.0
 redis==8.1.0
 pyjwt==2.10.1
 pwdlib[argon2]==0.2.1
-
-# --- Tests ---
-pytest==9.2.0
-pytest-cov==7.1.0
-httpx==0.28.1
