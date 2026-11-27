@@ -1,23 +1,14 @@
-"""Errores del dominio.
-
-Los servicios no saben nada de HTTP ni del LLM: solo lanzan estas excepciones.
-- api/   las traduce a códigos HTTP (404, 409, 422).
-- agent/ las traduce a mensajes que el modelo entiende.
-"""
+"""Errores del dominio. api/ los traduce a HTTP (404, 409, 422) y agent/ a mensajes para el modelo."""
 
 from app.models import OrderStatus
 
 
 class ShopError(Exception):
-    """Base de todos los errores del dominio (permite capturarlos de una vez)."""
+    """Base de los errores del dominio."""
 
 
 class OrderNotFound(ShopError):
-    """El pedido no existe o no pertenece al usuario.
-
-    Ambos casos dan el mismo error a propósito: así no se revela
-    que existe un pedido de otra persona con ese id.
-    """
+    """El pedido no existe o no pertenece al usuario (mismo error: no se revela que existe)."""
 
     def __init__(self, order_id: int) -> None:
         self.order_id = order_id
@@ -58,10 +49,7 @@ class InsufficientStock(ShopError):
 
 
 class InvalidCredentials(ShopError):
-    """Email o contraseña incorrectos.
-
-    Un único error para los dos casos a propósito: no revela si el email existe.
-    """
+    """Email o contraseña incorrectos (mismo error: no se revela si el email existe)."""
 
     def __init__(self) -> None:
         super().__init__("Email o contraseña incorrectos.")

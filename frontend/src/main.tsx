@@ -1,4 +1,3 @@
-// Fuentes servidas desde el propio proyecto (no desde Google): titulares y precios, y texto.
 import '@fontsource/bowlby-one-sc/400.css'
 import '@fontsource/sofia-sans/400.css'
 import '@fontsource/sofia-sans/600.css'
@@ -11,11 +10,9 @@ import './index.css'
 import { createCookieAuthService } from './services/cookieAuthService'
 import { setAuthHeadersProvider } from './services/httpClient'
 
-// Composición: el ÚNICO sitio que elige implementaciones concretas y las conecta.
-// Para otro sistema de login, se cambia esta línea por otra implementación de AuthService.
+// Raíz de composición: único punto donde se eligen implementaciones concretas.
 const authService = createCookieAuthService()
 
-// El cliente HTTP pide las cabeceras de auth en cada petición, sin conocer al servicio.
 setAuthHeadersProvider(() => authService.getAuthHeaders())
 
 createRoot(document.getElementById('root')!).render(

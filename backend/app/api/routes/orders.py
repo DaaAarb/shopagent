@@ -24,8 +24,7 @@ def get_order(order_id: int, user_id: CurrentUserId, orders: OrderServiceDep):
 
 @router.post("/{order_id}/cancel", response_model=OrderRead)
 def cancel_order(order_id: int, user_id: CurrentUserId, orders: OrderServiceDep):
-    # Acción explícita en vez de PATCH {"status": ...}: el cliente no puede
-    # pedir un estado arbitrario, solo lo que el negocio permite.
+    # Acción explícita en lugar de PATCH del estado: el cliente no elige estados arbitrarios.
     return orders.cancel_order(user_id, order_id)
 
 

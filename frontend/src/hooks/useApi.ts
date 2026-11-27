@@ -7,13 +7,7 @@ interface ApiState<T> {
   reload: () => void
 }
 
-/**
- * Hook propio: carga datos al montar el componente (y cuando cambian `deps`).
- *
- * Un hook es una función que usa otros hooks (useState, useEffect…). Sirve
- * para reutilizar lógica con estado: cada componente que lo llama tiene su
- * propia copia de `data`, `error` y `loading`.
- */
+/** Carga datos al montar y cada vez que cambian `deps`. */
 export function useApi<T>(load: () => Promise<T>, deps: unknown[] = []): ApiState<T> {
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -21,8 +15,7 @@ export function useApi<T>(load: () => Promise<T>, deps: unknown[] = []): ApiStat
   const [version, setVersion] = useState(0)
 
   useEffect(() => {
-    // Si el componente se desmonta o cambian las dependencias antes de que
-    // llegue la respuesta, se ignora: evita pintar datos que ya no tocan.
+    // Ignora respuestas que llegan tras desmontar o cambiar `deps`.
     let ignore = false
     setLoading(true)
     setError(null)

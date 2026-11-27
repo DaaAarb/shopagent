@@ -10,13 +10,10 @@ interface Props {
 export function ProductCard({ product, onOpen }: Props) {
   return (
     <article className="card product">
-      {/* Hueco de la imagen: sin fotos aún, un relleno de color por categoría con su nombre. */}
       <div className={`product-image cat-${product.category}`} aria-hidden>
         {CATEGORY_LABELS[product.category]}
       </div>
       <h3>
-        {/* Un botón real: se alcanza con Tab y se abre con Enter o Espacio. Su ::after
-            (ver App.css) cubre toda la tarjeta, así que con el ratón se puede pulsar en cualquier punto. */}
         <button type="button" className="product-open" onClick={onOpen}>
           {product.name}
         </button>

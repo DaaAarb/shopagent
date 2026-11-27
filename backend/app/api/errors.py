@@ -1,8 +1,4 @@
-"""Traducción de errores del dominio a HTTP, en un único sitio.
-
-Las rutas no tienen try/except: dejan que la excepción suba y este
-manejador global la convierte en la respuesta adecuada.
-"""
+"""Traducción centralizada de excepciones a respuestas HTTP (las rutas no capturan errores)."""
 
 import logging
 
@@ -31,10 +27,7 @@ NOT_AUTHENTICATED_DETAIL = "No has iniciado sesión o la sesión ha caducado."
 
 
 class NotAuthenticated(Exception):
-    """La petición no trae una sesión válida (sin cookie, manipulada o caducada) → 401.
-
-    Es un error de la capa HTTP, no del dominio: por eso no hereda de ShopError.
-    """
+    """Sin sesión válida (401). Es un error de la capa HTTP, no del dominio."""
 
 
 STATUS_BY_ERROR: dict[type[ShopError], int] = {
@@ -73,7 +66,7 @@ async def _handle_no_pending_action(_request: Request, _exc: Exception) -> JSONR
 
 
 async def _handle_agent_unavailable(_request: Request, exc: Exception) -> JSONResponse:
-    # El detalle técnico (Gemini caído, Redis sin arrancar...) va al log, no al cliente.
+    # El detalle técnico va al log, no al cliente.
     logger.error("Asistente no disponible: %r", exc)
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

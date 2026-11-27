@@ -2,14 +2,11 @@ import { useMemo, useState, type ReactNode } from 'react'
 import type { Product } from '../services/types'
 import { CartContext, type CartLine, type CartState } from './CartContext'
 
-/** Carrito en memoria del navegador. Se monta por usuario (ver App.tsx):
- *  al cambiar de sesión empieza vacío. */
+/** Carrito en memoria; se reinicia al cambiar de usuario (ver App.tsx). */
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([])
 
   const value = useMemo<CartState>(() => {
-    // El estado se actualiza siempre creando un array NUEVO, nunca modificando el actual:
-    // React compara referencias para saber si tiene que volver a pintar.
     const add = (product: Product) =>
       setLines((prev) =>
         prev.some((l) => l.product.id === product.id)
@@ -27,7 +24,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return {
       lines,
       count: lines.reduce((sum, l) => sum + l.quantity, 0),
-      // Orientativo: el total definitivo lo calcula el backend con los precios de la BD.
+      // Orientativo: el total real lo calcula el backend.
       totalCents: lines.reduce((sum, l) => sum + l.product.price_cents * l.quantity, 0),
       add,
       setQuantity,

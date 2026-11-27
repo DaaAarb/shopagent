@@ -18,13 +18,10 @@ class ProductRepository(Repository[Product]):
         return self.session.exec(select(Product).where(Product.slug == slug)).first()
 
     def lock_by_ids(self, product_ids: Collection[int]) -> list[Product]:
-        """Los productos que existan de entre esos ids, BLOQUEADOS para escribir.
+        """Productos con esos ids, bloqueados (`SELECT … FOR UPDATE`) hasta el fin de la transacción.
 
-        `SELECT … FOR UPDATE`: las filas quedan bloqueadas hasta el commit/rollback
-        de la transacción. Si dos compras del último ítem llegan a la vez, la segunda
-        espera aquí y, cuando la primera confirma, lee el stock ya descontado.
-        Se ordena por id para que todas las transacciones bloqueen en el mismo orden
-        y no se queden esperándose mutuamente (deadlock).
+        Dos compras simultáneas de la última unidad se serializan: la segunda lee el
+        stock ya descontado. El orden por id evita interbloqueos entre transacciones.
         """
         statement = (
             select(Product)

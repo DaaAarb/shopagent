@@ -4,8 +4,7 @@ from pydantic import BaseModel, StringConstraints
 
 from app.dtos.common import NonBlank
 
-# Validación de forma básica (algo@algo.algo) y normalizado a minúsculas:
-# "Lucia@Example.com" y "lucia@example.com" son la misma cuenta.
+# Validación de forma básica y normalizado a minúsculas (un email, una cuenta).
 Email = Annotated[
     str,
     StringConstraints(
@@ -17,11 +16,10 @@ Email = Annotated[
 class RegisterRequest(BaseModel):
     name: Annotated[NonBlank, StringConstraints(max_length=100)]
     email: Email
-    # Mínimo 8 (recomendación NIST); máximo para no hashear textos enormes.
+    # Mínimo 8 (NIST SP 800-63B); el máximo evita hashear entradas enormes.
     password: Annotated[str, StringConstraints(min_length=8, max_length=128)]
 
 
 class LoginRequest(BaseModel):
     email: Email
-    # Sin mínimo: una contraseña corta simplemente no coincidirá.
     password: Annotated[str, StringConstraints(max_length=128)]

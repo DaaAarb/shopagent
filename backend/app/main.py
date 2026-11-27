@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from app.api.errors import register_exception_handlers
 from app.api.routes import auth, chat, demo, orders, products, tickets
 
-# El esquema de la BD lo crean las migraciones (`alembic upgrade head`), no la app.
 app = FastAPI(
     title="ShopAgent",
     description="API de Loba Toys: pedidos y tickets, con reglas de negocio en el backend.",
@@ -21,5 +20,5 @@ app.include_router(demo.router)
 
 @app.get("/health", tags=["meta"])
 def health() -> dict[str, str]:
-    """Comprobación de vida: la usarán Docker y el despliegue."""
+    """Comprobación de vida para Docker y el despliegue."""
     return {"status": "ok"}

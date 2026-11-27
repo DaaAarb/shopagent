@@ -17,8 +17,7 @@ export default function App() {
   if (restoring) return <p className="muted page">Cargando…</p>
   if (!user) return <LoginPage />
 
-  // `key={user.id}`: si cambia el usuario, React desmonta y vuelve a montar la
-  // tienda entera. Carrito, chat y pedidos empiezan de cero, sin datos del anterior.
+  // key={user.id}: al cambiar de usuario se remonta la tienda y no queda estado del anterior.
   return (
     <CartProvider key={user.id}>
       <Shop />

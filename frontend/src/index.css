@@ -1,8 +1,5 @@
-/* Estilos GLOBALES: variables de diseño, elementos base y utilidades.
-   Los estilos de cada componente están en App.css.
-
-   Tema "Sticker": papel crema, tinta casi negra y rellenos rosa y lima. Todo el
-   color sale de las variables de abajo; el resto de archivos solo usa var(--…). */
+/* Estilos globales: variables de diseño, elementos base y utilidades.
+   Todo el color sale de estas variables; el resto de estilos solo usa var(--…). */
 
 :root {
   /* Papel y tinta */
@@ -53,7 +50,6 @@ h3 { font-size: 1.05rem; }
 p { margin: 0.25rem 0; }
 ::selection { background: var(--accent-2); color: var(--ink); }
 
-/* Foco visible para quien navega con teclado: aparece al instante, sin transición. */
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 
 /* --- Botones: el secundario es una píldora con borde de tinta --- */
@@ -69,13 +65,11 @@ button {
   padding: 0.4rem 1.1rem;
   cursor: pointer;
 }
-/* El botón que cubre la tarjeta de producto queda fuera de los estados de hover y de pulsación:
-   no debe cambiar de fondo ni moverse (si se moviera, cambiaría el área clicable mientras se pulsa). */
+/* .product-open se excluye: si se moviera al pulsar, cambiaría el área clicable de la tarjeta. */
 button:hover:not(:disabled, .product-open) { background: var(--paper-2); }
 button:active:not(:disabled, .product-open) { translate: 1px 1px; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* El principal: rosa, con anillo blanco y sombra dura; al pulsar se hunde en ella. */
 button.primary {
   background: var(--accent);
   color: var(--on-accent);
@@ -87,7 +81,6 @@ button.primary:hover:not(:disabled) { background: var(--accent-deep); }
 button.primary:active:not(:disabled) { translate: 4px 5px; box-shadow: var(--ring), var(--shadow-press); }
 button.primary:focus-visible { outline-offset: 9px; }
 
-/* Enlace: tinta con subrayado fino; al pasar el ratón, el subrayado se vuelve rosa. */
 button.link {
   background: none;
   box-shadow: none;
@@ -119,7 +112,6 @@ input::placeholder { color: var(--muted); }
 .page { padding: 2rem; }
 .num { text-align: right; white-space: nowrap; }
 
-/* La pegatina: borde blanco recortado sobre una sombra dura. */
 .card {
   background: var(--paper-3);
   border: 6px solid var(--white);
@@ -128,7 +120,6 @@ input::placeholder { color: var(--muted); }
   padding: 0.75rem 0.9rem;
 }
 
-/* Filtros: píldoras con borde de tinta; la elegida se rellena de tinta. */
 .chip { padding: 0.25rem 0.9rem; font-size: 0.9rem; min-height: 36px; }
 .chip.active { background: var(--ink); color: var(--paper); }
 .chip.active:hover:not(:disabled) { background: var(--ink-2); }

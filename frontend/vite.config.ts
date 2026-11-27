@@ -1,9 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// En desarrollo, Vite reenvía /api/* al backend (http://localhost:8000/*).
-// Así el navegador ve un único origen y no hace falta CORS. En producción lo
-// hará el servidor web que sirva el frontend.
+// Proxy de /api/* al backend: un único origen, sin CORS.
 export default defineConfig({
   plugins: [react()],
   server: {

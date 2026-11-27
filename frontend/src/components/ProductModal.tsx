@@ -12,17 +12,15 @@ interface Props {
 export function ProductModal({ product, onClose, onAdded }: Props) {
   const cart = useCart()
   const inCart = cart.quantityOf(product.id)
-  // No se deja añadir más unidades de las que hay: el backend lo rechazaría igualmente (409).
   const canAdd = inCart < product.stock
   const dialogRef = useRef<HTMLDivElement>(null)
-  // Siempre la última versión de onClose, sin tener que volver a montar el efecto de abajo.
+  // Ref a la última onClose para no volver a montar el efecto del diálogo.
   const closeRef = useRef(onClose)
   useEffect(() => {
     closeRef.current = onClose
   })
 
-  // Accesibilidad del diálogo: al abrir, el foco entra en él; Escape lo cierra; Tab no se
-  // sale hacia la página de detrás; y al cerrar el foco vuelve a donde estaba.
+  // Diálogo accesible: foco inicial, Escape, foco atrapado y foco restaurado al cerrar.
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
     dialogRef.current?.focus()
@@ -61,7 +59,6 @@ export function ProductModal({ product, onClose, onAdded }: Props) {
 
   return (
     <div className="backdrop" onClick={onClose}>
-      {/* stopPropagation: un clic dentro del modal no debe cerrarlo. */}
       <div
         className="modal"
         role="dialog"

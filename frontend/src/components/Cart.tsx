@@ -19,7 +19,7 @@ export function Cart({ onOrdered }: Props) {
   }
 
   async function checkout(event: FormEvent) {
-    event.preventDefault() // evita que el formulario recargue la página
+    event.preventDefault()
     setSending(true)
     setError(null)
     try {
@@ -30,7 +30,6 @@ export function Cart({ onOrdered }: Props) {
       cart.clear()
       onOrdered(order)
     } catch (err) {
-      // P. ej. 409 si otro cliente se llevó el stock mientras tanto.
       setError((err as Error).message)
       setSending(false)
     }

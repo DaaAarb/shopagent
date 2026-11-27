@@ -96,8 +96,7 @@ def downgrade() -> None:
     op.drop_table('product')
     # ### end Alembic commands ###
 
-    # drop_table no borra los tipos ENUM de PostgreSQL: sin esto, volver a
-    # hacer `upgrade` fallaría con "type ... already exists".
+    # drop_table no elimina los tipos ENUM de PostgreSQL.
     bind = op.get_bind()
     for enum_name in ('orderstatus', 'dogsize', 'productcategory'):
         sa.Enum(name=enum_name).drop(bind, checkfirst=True)

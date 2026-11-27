@@ -1,12 +1,8 @@
-"""Registro, login y logout con sesión en cookie httpOnly.
+"""Registro, login y logout con el JWT de sesión en una cookie.
 
-La cookie lleva un JWT firmado (app/security.py) y estos atributos:
-- HttpOnly: el JavaScript de la página NO puede leerla → un XSS no puede robar la sesión.
-- SameSite=Lax: el navegador no la envía en peticiones POST desde otras webs → protege de CSRF.
-- Secure (en producción): solo viaja por HTTPS.
-- Max-Age: caduca a la vez que el token.
-
-El frontend nunca ve el token: solo recibe los datos del usuario.
+- HttpOnly: inaccesible desde JavaScript (un XSS no puede robar la sesión).
+- SameSite=Lax: no se envía en POST desde otros sitios (mitiga CSRF).
+- Secure en producción y Max-Age igual a la caducidad del token.
 """
 
 from fastapi import APIRouter, Response, status
@@ -42,18 +38,17 @@ def register(body: RegisterRequest, response: Response, auth: AuthServiceDep):
 
 @router.post("/login", response_model=UserRead)
 def login(body: LoginRequest, response: Response, auth: AuthServiceDep):
-    user = auth.authenticate(body)  # InvalidCredentials → 401
+    user = auth.authenticate(body)
     _start_session(response, user.id)
     return user
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(response: Response):
-    # El JavaScript no puede borrar una cookie httpOnly: lo hace el servidor.
     response.delete_cookie(SESSION_COOKIE, path="/", httponly=True, samesite="lax")
 
 
 @router.get("/me", response_model=UserRead)
 def me(user_id: CurrentUserId, users: UserServiceDep):
-    """¿Hay sesión? El frontend lo pregunta al cargar (no puede leer la cookie)."""
+    """Usuario de la sesión actual (el frontend no puede leer la cookie)."""
     return users.get_user(user_id)

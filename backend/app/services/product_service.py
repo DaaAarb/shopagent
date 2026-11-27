@@ -5,8 +5,7 @@ from app.services.exceptions import ProductNotFound
 
 
 class ProductService:
-    """Consulta del catálogo. Es público: no recibe `user_id` porque cualquiera
-    puede ver los juguetes; las reglas de propiedad solo aplican a los pedidos."""
+    """Consulta del catálogo. Es público, así que no recibe `user_id`."""
 
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow

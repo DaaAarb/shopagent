@@ -71,8 +71,7 @@ def test_rejected_transition_does_not_change_the_order(
 
 
 # --- Cancelar repone el stock ----------------------------------------------------
-# Nota: make_order inserta el pedido sin pasar por el checkout, así que no descuenta
-# stock; aquí solo se comprueba que cancelar suma lo que el pedido tenía.
+# make_order no descuenta stock: se comprueba solo lo que suma la cancelación.
 
 
 def test_cancel_restores_stock_of_every_line(

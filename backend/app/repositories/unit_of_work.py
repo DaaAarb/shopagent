@@ -1,15 +1,9 @@
-"""Unidad de trabajo (Unit of Work): una transacción que agrupa varios repositorios.
+"""Unidad de trabajo: los repositorios comparten una sesión y se confirman juntos.
 
-Una operación de negocio puede tocar varias tablas a la vez (cancelar un pedido
-cambia el pedido y repone el stock de sus productos). Todos los repositorios
-comparten la misma sesión y solo la UnitOfWork confirma: o se guarda todo, o nada.
-
-Uso desde un servicio:
-
-    with self.uow:               # si algo lanza una excepción → rollback automático
+    with self.uow:               # rollback automático si hay excepción
         order = self.uow.orders.get(order_id)
         ...
-        self.uow.commit()        # un único commit para todos los cambios
+        self.uow.commit()
 """
 
 from types import TracebackType
@@ -37,7 +31,6 @@ class UnitOfWork:
     def rollback(self) -> None:
         self.session.rollback()
 
-    # `with uow:` llama a __enter__ al entrar y a __exit__ al salir (con o sin error).
     def __enter__(self) -> Self:
         return self
 
@@ -47,7 +40,6 @@ class UnitOfWork:
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        # Si el bloque falló, se deshace lo que no se llegó a confirmar.
-        # La excepción sigue subiendo (no devolvemos True): no se oculta el error.
+        # Rollback si el bloque falla; la excepción se propaga.
         if exc_type is not None:
             self.rollback()

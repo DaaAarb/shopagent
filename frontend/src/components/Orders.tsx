@@ -3,7 +3,7 @@ import { orderService } from '../services/orderService'
 import { STATUS_LABELS, formatDate, formatPrice } from '../utils/format'
 
 interface Props {
-  // Cambia cada vez que algo modifica los pedidos (p. ej. el agente): fuerza a recargar.
+  // Cambia cuando algo externo (el agente) modifica los pedidos y fuerza la recarga.
   refreshKey: number
 }
 

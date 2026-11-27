@@ -24,8 +24,7 @@ class TicketService:
             raise InvalidInput("El asunto y la descripción no pueden estar vacíos.")
 
         if order_id is not None:
-            # Reutiliza la comprobación de propiedad: no se puede abrir un
-            # ticket sobre el pedido de otra persona (ni saber si existe).
+            # Comprueba la propiedad del pedido (404 si es ajeno).
             self.orders.get_order(user_id, order_id)
 
         with self.uow:

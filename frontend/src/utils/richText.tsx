@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
 
-/** Formato mínimo de las respuestas del modelo: saltos de línea y **negrita**.
- *
- *  Se construyen elementos React, no HTML en bruto: el texto del modelo nunca se
- *  interpreta como HTML, así que una respuesta manipulada no puede inyectar scripts (XSS). */
+/** Saltos de línea y **negrita** en las respuestas del modelo.
+ *  Genera elementos React, nunca HTML: el texto del modelo no puede inyectar scripts. */
 export function renderRichText(text: string): ReactNode {
   return text.split('\n').map((line, i) => (
     <p key={i}>

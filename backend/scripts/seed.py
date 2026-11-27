@@ -1,20 +1,13 @@
-"""Datos de prueba de Loba Toys: BORRA la BD de desarrollo y la vuelve a llenar.
+"""Vacía la BD de desarrollo y la rellena con datos de demo: `python scripts/seed.py`.
 
-Uso (desde backend/, con PostgreSQL arrancado):
-
-    python scripts/seed.py
-
-Los pedidos se crean a través de OrderService (checkout, pagar, enviar…) y no con
-INSERT directos: así los datos de prueba cumplen las mismas reglas que la app
-(stock descontado, precios copiados, transiciones válidas).
+Los pedidos se crean con OrderService para que cumplan las mismas reglas que la app.
 """
 
 import json
 import sys
 from pathlib import Path
 
-# Permite `python scripts/seed.py`: Python añade scripts/ al path, no backend/,
-# y sin esto no encontraría el paquete `app`.
+# Permite ejecutarlo como script desde backend/ (hace importable el paquete `app`).
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
 
@@ -32,8 +25,7 @@ from app.services import OrderService  # noqa: E402
 
 CATALOG_FILE = Path(__file__).with_name("catalog.json")
 
-# Contraseña de TODOS los clientes de prueba. Es pública a propósito (sale en la
-# pantalla de login de la demo): son datos ficticios, nunca cuentas reales.
+# Pública a propósito: aparece en la pantalla de login de la demo.
 DEMO_PASSWORD = "loba1234"
 
 USERS = [
@@ -42,8 +34,7 @@ USERS = [
     ("Sofía Ruiz", "sofia@example.com", "Plaza de la Reina 3, 46003 Valencia"),
 ]
 
-# Pedidos de cada usuario: (estado final, [(slug, cantidad), ...]).
-# Cubren todos los estados para que la demo y el agente tengan de todo.
+# (estado final, [(slug, cantidad), ...]); cubren todos los estados.
 ORDERS: dict[str, list[tuple[str, list[tuple[str, int]]]]] = {
     "lucia@example.com": [
         ("delivered", [("pelota-rebotona", 2), ("hueso-roedor", 1)]),
@@ -53,7 +44,7 @@ ORDERS: dict[str, list[tuple[str, list[tuple[str, int]]]]] = {
     "marcos@example.com": [
         ("shipped", [("cuerda-tira-y-afloja", 2)]),
         ("cancelled", [("erizo-crujiente", 1)]),
-        # Se lleva los 2 últimos: el Cubo Premios queda agotado (stock 0).
+        # Agota el stock del Cubo Premios.
         ("delivered", [("cubo-premios", 2)]),
     ],
     "sofia@example.com": [
@@ -61,7 +52,6 @@ ORDERS: dict[str, list[tuple[str, list[tuple[str, int]]]]] = {
     ],
 }
 
-# Pasos de la máquina de estados para llegar a cada estado final.
 STEPS = {
     "pending": [],
     "paid": ["pay_order"],

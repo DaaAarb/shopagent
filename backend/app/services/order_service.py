@@ -11,15 +11,12 @@ from app.services.exceptions import (
 
 
 class OrderService:
-    """Reglas de negocio y permisos sobre pedidos.
+    """Reglas de negocio y permisos sobre pedidos, compartidos por la API y el agente.
 
-    Única puerta de entrada para leer o modificar pedidos: la API y el agente
-    llaman a esta clase. Todo método recibe el `user_id` de quien pregunta y
-    comprueba que el pedido es suyo. Devuelve DTOs: las entidades no salen de aquí.
+    Cada método recibe el `user_id` de quien pregunta y comprueba la propiedad del pedido.
     """
 
-    # Máquina de estados: para cada estado, a qué estados puede pasar.
-    # Cualquier otro cambio (saltarse un paso, volver atrás) se rechaza con 409.
+    # Máquina de estados: cualquier transición no listada se rechaza (409).
     TRANSITIONS: dict[OrderStatus, frozenset[OrderStatus]] = {
         OrderStatus.PENDING: frozenset({OrderStatus.PAID, OrderStatus.CANCELLED}),
         OrderStatus.PAID: frozenset({OrderStatus.SHIPPED, OrderStatus.CANCELLED}),
@@ -30,31 +27,26 @@ class OrderService:
     ADDRESS_CHANGEABLE_STATES = frozenset({OrderStatus.PENDING, OrderStatus.PAID})
 
     def __init__(self, uow: UnitOfWork) -> None:
-        # La unidad de trabajo se inyecta: da acceso a los repositorios y a la transacción.
         self.uow = uow
 
     def get_order(self, user_id: int, order_id: int) -> OrderRead:
         return OrderRead.from_entity(self._get_owned(user_id, order_id))
 
     def list_orders(self, user_id: int) -> list[OrderRead]:
-        """Pedidos del usuario, del más reciente al más antiguo."""
         return [OrderRead.from_entity(o) for o in self.uow.orders.list_for_user(user_id)]
 
     def create_order(self, user_id: int, data: OrderCreate) -> OrderRead:
         """Checkout simulado (sin pago): crea el pedido en `pending` y descuenta stock."""
-        # Si el carrito repite un producto, se suman las cantidades: la comprobación
-        # de stock debe ver el total pedido de cada producto, no cada línea suelta.
+        # Agrupa líneas repetidas: el stock se comprueba contra el total por producto.
         quantities: dict[int, int] = {}
         for line in data.items:
             quantities[line.product_id] = quantities.get(line.product_id, 0) + line.quantity
 
         with self.uow:
-            # Bloquea las filas de esos productos hasta el commit: evita que dos
-            # compras simultáneas vendan la misma última unidad.
+            # Bloqueo de filas: dos compras simultáneas no venden la misma última unidad.
             products = {p.id: p for p in self.uow.products.lock_by_ids(list(quantities))}
 
-            # Primero se comprueba TODO y después se modifica: así el rechazo es
-            # entero (409) y nunca queda un producto descontado sin su pedido.
+            # Se valida todo antes de modificar nada: el rechazo es del pedido entero.
             for product_id, quantity in quantities.items():
                 product = products.get(product_id)
                 if product is None:
@@ -64,8 +56,6 @@ class OrderService:
 
             order = Order(
                 user_id=user_id,
-                # Precio copiado del producto ahora: el histórico no cambia si el
-                # catálogo sube de precio mañana. El total sale de las líneas.
                 total_cents=sum(products[pid].price_cents * qty for pid, qty in quantities.items()),
                 shipping_address=data.shipping_address,
                 items=[
@@ -80,7 +70,6 @@ class OrderService:
             for pid, qty in quantities.items():
                 products[pid].stock -= qty
 
-            # Pedido, líneas y stock se guardan en UN commit: todo o nada.
             self.uow.orders.add(order)
             self.uow.commit()
             return OrderRead.from_entity(order)
@@ -90,9 +79,7 @@ class OrderService:
             order = self._get_owned(user_id, order_id)
             self._check_transition(order, OrderStatus.CANCELLED, "cancelar")
 
-            # Reponer el stock y cancelar van en UNA transacción (un único commit):
-            # o se guardan las dos cosas o ninguna. Nunca queda un pedido cancelado
-            # con el stock sin devolver, ni stock devuelto de un pedido vivo.
+            # Reposición de stock y cancelación en la misma transacción.
             for item in order.items:
                 item.product.stock += item.quantity
             order.status = OrderStatus.CANCELLED
@@ -114,8 +101,7 @@ class OrderService:
             self.uow.commit()
             return OrderRead.from_entity(order)
 
-    # Avance de estados: los usa el endpoint de demo (sustituyen a la pasarela de pago
-    # y a la logística reales). Pasan por la misma máquina de estados que la cancelación.
+    # Avance de estados para los endpoints de demo (simulan pago y logística).
     def pay_order(self, user_id: int, order_id: int) -> OrderRead:
         return self._transition(user_id, order_id, OrderStatus.PAID, "pagar")
 
@@ -125,11 +111,11 @@ class OrderService:
     def deliver_order(self, user_id: int, order_id: int) -> OrderRead:
         return self._transition(user_id, order_id, OrderStatus.DELIVERED, "entregar")
 
-    # --- Auxiliares (trabajan con entidades; por eso son privados) ----------------
+    # --- Auxiliares --------------------------------------------------------------
 
     def _get_owned(self, user_id: int, order_id: int) -> Order:
         order = self.uow.orders.get(order_id)
-        # Inexistente y ajeno se tratan igual: no se revela que el pedido existe.
+        # Inexistente y ajeno dan el mismo error: no se revela que el pedido existe.
         if order is None or order.user_id != user_id:
             raise OrderNotFound(order_id)
         return order
@@ -137,7 +123,6 @@ class OrderService:
     def _transition(
         self, user_id: int, order_id: int, new_status: OrderStatus, action: str
     ) -> OrderRead:
-        """Cambio de estado sin efectos extra (pagar, enviar, entregar)."""
         with self.uow:
             order = self._get_owned(user_id, order_id)
             self._check_transition(order, new_status, action)
@@ -147,6 +132,5 @@ class OrderService:
             return OrderRead.from_entity(order)
 
     def _check_transition(self, order: Order, new_status: OrderStatus, action: str) -> None:
-        """Único punto que decide si un cambio de estado está permitido."""
         if new_status not in self.TRANSITIONS[order.status]:
             raise InvalidOrderState(order.id, order.status, action)

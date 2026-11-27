@@ -1,8 +1,4 @@
-"""Bucle del agente con un LLM FALSO: nunca se llama a Gemini en los tests.
-
-`FakeLLM` devuelve respuestas guionizadas ("pide get_order(3)", "responde X") y
-apunta lo que recibió. Así se prueba la lógica del agente de forma determinista.
-"""
+"""Bucle del agente con un LLM falso (respuestas predefinidas, sin llamadas a Gemini)."""
 
 import pytest
 

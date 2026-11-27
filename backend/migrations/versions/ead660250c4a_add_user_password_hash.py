@@ -21,9 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # Los usuarios que ya existan reciben un hash vacío: no pueden entrar hasta que se
-    # les asigne contraseña (en desarrollo, volviendo a ejecutar scripts/seed.py).
-    # El valor por defecto solo existe para este paso; después se quita.
+    # Default temporal para las filas existentes (quedan sin poder iniciar sesión).
     op.add_column(
         'user',
         sa.Column('password_hash', sqlmodel.sql.sqltypes.AutoString(), nullable=False, server_default=''),

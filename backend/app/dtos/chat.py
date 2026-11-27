@@ -6,7 +6,7 @@ from app.dtos.common import NonBlank
 
 
 class ChatMessageCreate(BaseModel):
-    # Límite de longitud: cada carácter viaja al LLM y cuesta tokens.
+    # Acotado: el mensaje se envía al LLM y consume tokens.
     message: Annotated[NonBlank, StringConstraints(max_length=2000)]
 
 

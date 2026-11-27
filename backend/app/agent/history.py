@@ -1,10 +1,4 @@
-"""Memoria del chat: historial de mensajes y acción pendiente de confirmar, por usuario.
-
-Misma idea que el LLM: una interfaz (`ChatStore`) y dos implementaciones.
-- `RedisChatStore`: la real. Redis guarda datos efímeros con caducidad (TTL):
-  una conversación abandonada se borra sola.
-- `InMemoryChatStore`: para los tests (sin Redis, sin red).
-"""
+"""Historial del chat y acción pendiente por usuario: Redis con TTL y una versión en memoria para tests."""
 
 from typing import Protocol
 
@@ -13,18 +7,18 @@ from redis import Redis
 
 from app.agent.llm import Message, ToolCall
 
-# Máximo de mensajes que se guardan (y se envían al modelo en cada turno).
+# También acota el contexto que se envía al modelo en cada turno.
 MAX_HISTORY_MESSAGES = 30
 
-_messages = TypeAdapter(list[Message])  # serializa/deserializa list[Message] ⇄ JSON
+_messages = TypeAdapter(list[Message])
 
 
 class PendingAction(BaseModel):
-    """Acción destructiva propuesta por el modelo, a la espera del "sí" del cliente."""
+    """Acción destructiva propuesta por el modelo, pendiente de confirmación."""
 
-    id: str  # aleatorio: la confirmación debe referirse a ESTA acción concreta
+    id: str  # la confirmación debe referirse a esta acción concreta
     tool_call: ToolCall
-    description: str  # p. ej. "Cancelar el pedido 3"
+    description: str
 
 
 class ChatStore(Protocol):
@@ -35,10 +29,10 @@ class ChatStore(Protocol):
 
 
 def trim_history(history: list[Message], limit: int = MAX_HISTORY_MESSAGES) -> list[Message]:
-    """Se queda con los últimos `limit` mensajes, empezando SIEMPRE en uno del usuario.
+    """Últimos `limit` mensajes, empezando siempre en uno del usuario.
 
-    Cortar a ciegas podría dejar un resultado de herramienta sin la llamada que lo
-    pidió, y el proveedor rechazaría el historial.
+    Un corte arbitrario podría dejar un resultado de herramienta sin su llamada,
+    y el proveedor rechazaría el historial.
     """
     if len(history) <= limit:
         return history
@@ -59,7 +53,7 @@ class RedisChatStore:
         return _messages.validate_json(raw) if raw else []
 
     def save_history(self, user_id: int, history: list[Message]) -> None:
-        # `ex=` fija la caducidad; cada mensaje nuevo la renueva.
+        # Cada escritura renueva el TTL.
         self.redis.set(
             f"chat:{user_id}:history", _messages.dump_json(trim_history(history)), ex=self.ttl
         )
@@ -77,8 +71,7 @@ class RedisChatStore:
 
 
 class InMemoryChatStore:
-    """Misma interfaz, en diccionarios. Guarda copias en JSON para comportarse
-    como Redis (lo guardado no cambia si luego se modifica el objeto original)."""
+    """Implementación para tests. Guarda JSON, como Redis, para no compartir referencias."""
 
     def __init__(self) -> None:
         self._history: dict[int, str] = {}

@@ -1,5 +1,4 @@
-// Tipos del contrato con el backend: reflejan los DTOs de backend/app/dtos/.
-// Si un DTO cambia allí, se cambia aquí.
+// Reflejan los DTOs de backend/app/dtos/.
 
 export type ProductCategory = 'balls' | 'chew' | 'rope' | 'plush' | 'interactive'
 export type DogSize = 'small' | 'medium' | 'large' | 'all'
@@ -37,7 +36,7 @@ export interface Order {
   status: OrderStatus
   total_cents: number
   shipping_address: string
-  created_at: string // ISO 8601: JSON no tiene tipo fecha
+  created_at: string // ISO 8601
   items: OrderItem[]
 }
 

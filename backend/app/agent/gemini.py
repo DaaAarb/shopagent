@@ -1,9 +1,4 @@
-"""Adaptador de Gemini: implementa la interfaz `LLMClient` (agent/llm.py) con Google.
-
-Es el ÚNICO módulo que importa el SDK de Google. Traduce en los dos sentidos:
-    formato del agente (Message, ToolSpec)  →  formato de Gemini  →  llamada a la API
-    respuesta de Gemini                     →  LLMResponse
-"""
+"""Adaptador de Gemini para `LLMClient`. Es el único módulo que importa el SDK de Google."""
 
 import base64
 
@@ -15,11 +10,8 @@ from app.agent.llm import LLMError, LLMResponse, Message, ToolCall, ToolSpec
 
 
 class GeminiClient:
-    """Cumple `LLMClient` por su forma (tiene `generate`), sin heredar de él."""
-
     def __init__(self, api_key: str, model: str, timeout_seconds: float = 30) -> None:
-        # Sin timeout, una respuesta lenta del proveedor dejaría colgada la petición
-        # /chat indefinidamente. El SDK espera el valor en milisegundos.
+        # El SDK espera el timeout en milisegundos.
         self._client = genai.Client(
             api_key=api_key,
             http_options=types.HttpOptions(timeout=int(timeout_seconds * 1000)),
@@ -32,8 +24,7 @@ class GeminiClient:
         config = types.GenerateContentConfig(
             system_instruction=system,
             tools=[to_gemini_tool(tools)] if tools else None,
-            # El SDK puede ejecutar funciones Python solo. Lo desactivamos: quien
-            # ejecuta (y valida, y pide confirmación) es nuestro bucle, no el SDK.
+            # Las herramientas las valida y ejecuta el bucle del agente, nunca el SDK.
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
         )
         try:
@@ -45,7 +36,7 @@ class GeminiClient:
         return from_gemini_response(response)
 
 
-# --- Traducciones (funciones puras: se prueban sin llamar a la API) ----------------
+# --- Traducción entre los tipos del agente y los de Gemini -----------------------
 
 
 def to_gemini_tool(tools: list[ToolSpec]) -> types.Tool:
@@ -69,14 +60,13 @@ def to_gemini_contents(history: list[Message]) -> list[types.Content]:
             parts += [
                 types.Part(
                     function_call=types.FunctionCall(name=call.name, args=call.arguments),
-                    # Gemini 3 exige recibir de vuelta la firma que adjuntó a la llamada.
+                    # Gemini 3 exige recibir de vuelta la firma de cada llamada.
                     thought_signature=base64.b64decode(call.signature) if call.signature else None,
                 )
                 for call in message.tool_calls
             ]
-            # Gemini llama "model" al rol del asistente.
             contents.append(types.Content(role="model", parts=parts))
-        else:  # "tool": en Gemini los resultados viajan en un turno de usuario
+        else:  # en Gemini, los resultados de herramientas van en un turno "user"
             contents.append(
                 types.Content(
                     role="user",
@@ -96,7 +86,7 @@ def from_gemini_response(response: types.GenerateContentResponse) -> LLMResponse
     texts: list[str] = []
     calls: list[ToolCall] = []
     for part in response.candidates[0].content.parts or []:
-        if part.thought:  # razonamiento interno del modelo: no es para el usuario
+        if part.thought:
             continue
         if part.function_call:
             calls.append(
