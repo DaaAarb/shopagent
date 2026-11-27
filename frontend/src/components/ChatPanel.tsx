@@ -10,7 +10,7 @@ interface ChatMessage {
 }
 
 interface Props {
-  // Se llama cuando una acción confirmada cambia datos (para refrescar "Mis pedidos").
+  // Se invoca cuando una acción confirmada modifica pedidos.
   onDataChanged: () => void
 }
 
@@ -25,7 +25,6 @@ export function ChatPanel({ onDataChanged }: Props) {
   const [busy, setBusy] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
 
-  // Baja hasta el último mensaje cada vez que llega uno.
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     endRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
@@ -37,7 +36,7 @@ export function ChatPanel({ onDataChanged }: Props) {
     if (!text.trim() || busy) return
     add({ role: 'user', text })
     setInput('')
-    setPending(null) // el backend descarta la acción pendiente con un mensaje nuevo
+    setPending(null) // el backend descarta la acción pendiente al recibir un mensaje
     setBusy(true)
     try {
       const reply = await chatService.send(text)
@@ -53,7 +52,7 @@ export function ChatPanel({ onDataChanged }: Props) {
   async function resolve(approve: boolean) {
     if (!pending) return
     const action = pending
-    setPending(null) // se ocultan los botones ya: evita el doble clic
+    setPending(null) // evita el doble clic
     add({ role: 'user', text: approve ? 'Sí, confírmalo' : 'No, déjalo' })
     setBusy(true)
     try {
@@ -79,7 +78,6 @@ export function ChatPanel({ onDataChanged }: Props) {
         <span className="muted small">Consulta, cancela o cambia tus pedidos</span>
       </header>
 
-      {/* role="log": los lectores de pantalla anuncian cada mensaje nuevo sin interrumpir. */}
       <div className="messages" role="log" aria-label="Conversación">
         {messages.length === 0 && (
           <div className="welcome">

@@ -1,16 +1,9 @@
-"""Herramientas del agente: lo ÚNICO que el LLM puede pedir que se haga.
+"""Herramientas del agente: las únicas acciones que el LLM puede solicitar.
 
-El modelo nunca toca la base de datos: propone una herramienta y unos argumentos,
-y este módulo decide qué pasa:
-1. `validate`: ¿existe la herramienta? ¿los argumentos son válidos? (Pydantic)
-2. `run`: llama a la capa de servicios, que aplica reglas de negocio y permisos.
-
-El `user_id` NUNCA es un argumento de las herramientas: llega de la sesión
-(la cookie firmada). Aunque el modelo sufra prompt injection, no puede actuar como otro usuario.
-
-Las herramientas destructivas (cancelar, cambiar dirección) llevan un texto de
-confirmación. El bucle del agente las valida pero NO las ejecuta: las guarda como
-acción pendiente hasta que el usuario confirme (human-in-the-loop).
+El modelo propone herramienta y argumentos; aquí se validan con Pydantic y se
+ejecutan a través de la capa de servicios. El `user_id` nunca es un argumento:
+sale de la sesión, así que ni un prompt injection permite actuar como otro usuario.
+Las herramientas con `confirmation` son destructivas y requieren aprobación.
 """
 
 from collections.abc import Callable
@@ -24,8 +17,7 @@ from app.dtos.common import NonBlank
 from app.services import OrderService, ShopError, TicketService
 
 # --- Argumentos de cada herramienta ------------------------------------------------
-# Las `description` de los campos llegan al modelo dentro del JSON Schema: le dicen
-# qué poner en cada argumento.
+# Las `description` de los campos llegan al modelo dentro del JSON Schema.
 
 OrderId = Annotated[int, Field(gt=0, description="Número del pedido, p. ej. 3.")]
 
@@ -66,8 +58,6 @@ class OpenTicketArgs(BaseModel):
 
 @dataclass(frozen=True)
 class ToolServices:
-    """Los servicios que las herramientas pueden usar (inyectados desde fuera)."""
-
     orders: OrderService
     tickets: TicketService
 
@@ -77,9 +67,9 @@ class AgentTool:
     name: str
     description: str
     args_model: type[BaseModel]
-    # Ejecuta la acción. Recibe el user_id de la SESIÓN, nunca uno del modelo.
+    # Recibe el user_id de la sesión, nunca uno propuesto por el modelo.
     run: Callable[[ToolServices, int, Any], dict[str, Any]]
-    # Si existe, la herramienta es destructiva: hay que confirmar antes de ejecutar.
+    # Si existe, la herramienta es destructiva y requiere confirmación.
     confirmation: Callable[[Any], str] | None = None
 
     @property
@@ -88,7 +78,6 @@ class AgentTool:
 
 
 def _dump(model: BaseModel) -> dict[str, Any]:
-    # mode="json": fechas y enums como texto, para que el resultado sea JSON puro.
     return model.model_dump(mode="json")
 
 
@@ -152,16 +141,11 @@ TOOLS: dict[str, AgentTool] = {
 
 
 class InvalidToolCall(Exception):
-    """El modelo pidió una herramienta inexistente o con argumentos inválidos.
-
-    No es un error del usuario: el mensaje se le devuelve al modelo para que corrija.
-    """
+    """Herramienta inexistente o argumentos inválidos; el mensaje vuelve al modelo."""
 
 
 @dataclass(frozen=True)
 class ValidatedCall:
-    """Una llamada ya validada, lista para ejecutarse (o para pedir confirmación)."""
-
     tool: AgentTool
     args: BaseModel
 
@@ -179,7 +163,6 @@ class ToolBox:
         self.services = services
 
     def specs(self) -> list[ToolSpec]:
-        """Descripción de las herramientas para el modelo."""
         return [
             ToolSpec(
                 name=t.name, description=t.description, parameters=t.args_model.model_json_schema()
@@ -194,7 +177,6 @@ class ToolBox:
         try:
             args = tool.args_model.model_validate(call.arguments)
         except ValidationError as exc:
-            # Mensajes cortos (campo + problema): el modelo los entiende y corrige.
             problems = "; ".join(
                 f"{'.'.join(map(str, e['loc'])) or 'argumentos'}: {e['msg']}" for e in exc.errors()
             )
@@ -202,8 +184,7 @@ class ToolBox:
         return ValidatedCall(tool=tool, args=args)
 
     def run(self, user_id: int, call: ValidatedCall) -> ToolResult:
-        """Ejecuta la herramienta. Los errores de negocio se devuelven como resultado:
-        el modelo los lee y se los explica al cliente (p. ej. "ya está enviado")."""
+        """Ejecuta la herramienta; los errores de negocio se devuelven como resultado para el modelo."""
         try:
             content = call.tool.run(self.services, user_id, call.args)
         except ShopError as exc:

@@ -1,17 +1,9 @@
 """Bucle del agente: conversación con el LLM, herramientas y confirmaciones.
 
-Un turno de chat:
-    1. Se añade el mensaje del cliente al historial.
-    2. Se le pasa al LLM el historial y las herramientas.
-    3. Si responde con texto → fin del turno.
-       Si pide herramientas → se validan:
-         - lectura (consultar, abrir ticket): se ejecutan y el resultado vuelve al LLM;
-         - destructivas (cancelar, cambiar dirección): NO se ejecutan. Se guardan como
-           acción pendiente y el turno termina preguntando al cliente si confirma.
-    4. Se repite como mucho MAX_STEPS veces (evita bucles infinitos y gasto sin control).
-
-La acción pendiente solo se ejecuta con `confirm()`, que llama el endpoint del
-botón "Confirmar" del frontend. El LLM no puede confirmar nada por su cuenta.
+En cada turno, las herramientas que pide el modelo se validan. Las no destructivas
+se ejecutan y su resultado vuelve al modelo; una destructiva no se ejecuta: queda
+como acción pendiente hasta que el cliente la apruebe con `confirm()`. El número de
+iteraciones está acotado por MAX_STEPS.
 """
 
 import uuid
@@ -32,8 +24,6 @@ FALLBACK_REPLY = (
 
 
 class PendingActionRead(BaseModel):
-    """Lo que ve el frontend de una acción pendiente (para pintar el botón)."""
-
     id: str
     description: str
 
@@ -44,20 +34,18 @@ class ChatReply(BaseModel):
 
 
 class NoPendingAction(Exception):
-    """Se intenta confirmar una acción que no existe, ya caducó o no es la actual."""
+    """La acción a confirmar no existe, ha caducado o no es la actual."""
 
 
 class Agent:
     def __init__(self, llm: LLMClient, tools: ToolBox, store: ChatStore) -> None:
-        # Las tres piezas se inyectan: en los tests, un LLM falso y un historial en memoria.
         self.llm = llm
         self.tools = tools
         self.store = store
 
     def chat(self, user_id: int, text: str) -> ChatReply:
         history = self.store.load_history(user_id)
-        # Un mensaje nuevo deja sin efecto la acción que estuviera esperando
-        # confirmación: el cliente ha cambiado de tema o de idea.
+        # Un mensaje nuevo descarta la acción que esperaba confirmación.
         self.store.set_pending(user_id, None)
         history.append(Message(role="user", text=text))
 
@@ -74,8 +62,7 @@ class Agent:
             history.append(Message(role="tool", tool_results=results))
 
             if pending is not None:
-                # La pregunta de confirmación la escribe el backend, no el LLM: así el
-                # cliente ve exactamente qué se va a hacer, sin interpretaciones.
+                # El texto de confirmación lo genera el backend, no el LLM.
                 reply = f"{pending.description}. ¿Lo confirmas?"
                 history.append(Message(role="assistant", text=reply))
                 self.store.set_pending(user_id, pending)
@@ -85,7 +72,6 @@ class Agent:
                     pending_action=PendingActionRead(id=pending.id, description=pending.description),
                 )
 
-        # Se agotaron las vueltas sin una respuesta final.
         history.append(Message(role="assistant", text=FALLBACK_REPLY))
         self.store.save_history(user_id, history)
         return ChatReply(reply=FALLBACK_REPLY)
@@ -94,12 +80,11 @@ class Agent:
         pending = self.store.get_pending(user_id)
         if pending is None or pending.id != action_id:
             raise NoPendingAction()
-        # Se borra ANTES de ejecutar: un doble clic no puede ejecutar la acción dos veces.
+        # Se borra antes de ejecutar para que un doble clic no la ejecute dos veces.
         self.store.set_pending(user_id, None)
 
         if approve:
-            # Se vuelve a validar y, al ejecutar, el servicio vuelve a comprobar las
-            # reglas: el pedido puede haber cambiado de estado mientras tanto.
+            # El servicio revalida las reglas: el pedido puede haber cambiado entretanto.
             result = self.tools.run(user_id, self.tools.validate(pending.tool_call))
             error = result.content.get("error")
             reply = (
@@ -112,7 +97,7 @@ class Agent:
             reply = "De acuerdo, no he hecho ningún cambio."
             user_text = f"No confirmo: {pending.description}"
 
-        # Se anota en el historial para que el modelo sepa qué pasó en los turnos siguientes.
+        # Queda en el historial para que el modelo tenga contexto en los turnos siguientes.
         history = self.store.load_history(user_id)
         history += [Message(role="user", text=user_text), Message(role="assistant", text=reply)]
         self.store.save_history(user_id, history)
@@ -121,7 +106,7 @@ class Agent:
     def _handle_tool_calls(
         self, user_id: int, calls: list[ToolCall]
     ) -> tuple[list[ToolResult], PendingAction | None]:
-        """Ejecuta las de lectura y aparta (como mucho) una destructiva."""
+        """Ejecuta las no destructivas y aparta como mucho una destructiva."""
         results: list[ToolResult] = []
         pending: PendingAction | None = None
 
@@ -129,7 +114,7 @@ class Agent:
             try:
                 validated = self.tools.validate(call)
             except InvalidToolCall as exc:
-                # El modelo se equivocó: se le devuelve el error para que corrija.
+                # El error vuelve al modelo para que corrija la llamada.
                 results.append(ToolResult(name=call.name, content={"error": str(exc)}))
                 continue
 
@@ -151,7 +136,7 @@ class Agent:
                     )
                 )
             else:
-                # Una sola confirmación por turno: el cliente decide de una en una.
+                # Una sola confirmación por turno.
                 results.append(
                     ToolResult(
                         name=call.name,

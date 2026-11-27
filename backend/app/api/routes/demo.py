@@ -1,9 +1,6 @@
-"""Endpoints de DEMO: sustituyen a la pasarela de pago y a la empresa de transporte.
+"""Endpoints de demo que simulan la pasarela de pago y el transportista.
 
-En una tienda real, el pago lo confirmaría la pasarela y el envío/entrega el
-transportista. Aquí se avanzan a mano para poder enseñar todo el ciclo de vida.
-No son un atajo: pasan por la misma máquina de estados y la misma comprobación
-de propiedad que el resto (no se puede enviar un pedido sin pagar, ni tocar uno ajeno).
+Pasan por la misma máquina de estados y comprobación de propiedad que el resto.
 """
 
 from fastapi import APIRouter

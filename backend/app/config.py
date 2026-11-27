@@ -4,43 +4,36 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Configuración leída de variables de entorno (o del archivo .env).
+    """Configuración leída de variables de entorno o de `.env`.
 
-    Nada sensible vive en el código: los valores por defecto apuntan al
-    PostgreSQL local de `docker compose up -d db`; en otros entornos se
-    sobrescriben con DATABASE_URL y TEST_DATABASE_URL.
+    Los valores por defecto apuntan a los servicios locales de docker-compose.yml.
     """
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Valores por defecto = los del docker-compose.yml (solo para desarrollo local).
     database_url: str = "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagentPG"
-    # Base de datos aparte para los tests: se vacía y se recrea en cada ejecución.
+    # Los tests la vacían y la recrean en cada ejecución.
     test_database_url: str = (
         "postgresql+psycopg://darb:shopagent123@localhost:5433/shopagent_test"
     )
 
     # --- Autenticación ---
-    # Firma los tokens de sesión. Sin valor por defecto a propósito: con un secreto
-    # conocido, cualquiera podría fabricar tokens válidos. Va en .env.
+    # Sin valor por defecto: con un secreto conocido se podrían falsificar sesiones.
     secret_key: str = ""
     session_minutes: int = 60
-    # True en producción (HTTPS): la cookie nunca viaja sin cifrar.
+    # True en producción: la cookie solo viaja por HTTPS.
     cookie_secure: bool = False
 
     # --- Agente ---
-    # Vacía por defecto: la app arranca sin ella (el catálogo y los pedidos funcionan);
-    # solo /chat la necesita. Nunca en el código: va en .env.
+    # Solo la necesita /chat: el resto de la API funciona sin ella.
     gemini_api_key: str = ""
     llm_model: str = "gemini-3.5-flash"
 
-    # Historial del chat (Redis de `docker compose up -d redis`).
     redis_url: str = "redis://localhost:6380/0"
-    # La conversación se olvida tras 24 h sin actividad.
+    # Caducidad del historial del chat sin actividad.
     chat_ttl_seconds: int = 24 * 60 * 60
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """Devuelve siempre la misma instancia (se lee el entorno una sola vez)."""
     return Settings()

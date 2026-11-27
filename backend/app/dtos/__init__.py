@@ -1,12 +1,7 @@
-"""DTOs (Data Transfer Objects): los mensajes estructurados que cruzan las fronteras.
+"""DTOs: el contrato del backend con el frontend y con las herramientas del agente.
 
-Son el contrato del backend con el exterior: el frontend los recibe como JSON y
-el agente los usará como resultado de sus herramientas. Separados de los modelos
-de tabla a propósito:
-- Entrada (`…Create`, `…Update`): validan. Los modelos table=True no lo hacen.
-- Salida (`…Read`): deciden qué se expone; un campo interno nuevo no se filtra.
-
-Los servicios reciben y devuelven DTOs: las entidades del ORM nunca salen de services/.
+- Entrada (`…Create`, `…Update`, `…Request`): validan los datos recibidos.
+- Salida (`…Read`): fijan qué se expone, así un campo interno nuevo no se filtra.
 """
 
 from app.dtos.auth import LoginRequest, RegisterRequest

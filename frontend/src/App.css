@@ -1,4 +1,4 @@
-/* Estilos de los componentes. Los globales (variables, botones…) están en index.css. */
+/* Estilos de componentes. Variables y estilos globales en index.css. */
 
 /* --- Login --- */
 .auth-page { min-height: 100vh; display: grid; place-items: center; padding: 2rem 1rem; }
@@ -59,15 +59,13 @@ main { grid-area: main; overflow-y: auto; padding: 1.5rem; }
 .product:nth-child(odd) { --tilt: -1deg; }
 .product:nth-child(even) { --tilt: 1deg; }
 .product:hover { translate: 0 -2px; rotate: 0deg; }
-/* El título es un botón real (se alcanza con Tab y se abre con Enter o Espacio) y su
-   ::after se estira para que toda la tarjeta sea clicable. */
+/* El ::after del botón del título cubre la tarjeta: toda ella es clicable. */
 .product-open { all: unset; cursor: pointer; }
 .product-open::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius-card); }
 .product-open:focus-visible { outline: none; }
 .product:has(.product-open:focus-visible) { outline: 3px solid var(--accent); outline-offset: 4px; }
 
-/* Sin fotos todavía: el producto es un relleno de color por categoría con su nombre en grande.
-   Cuando haya fotos, ocuparán este mismo hueco. */
+/* Bloque de color por categoría en el hueco de la imagen del producto. */
 .product-image {
   display: grid;
   place-items: center;
@@ -92,7 +90,6 @@ main { grid-area: main; overflow-y: auto; padding: 1.5rem; }
 .product-image.cat-plush { background: var(--paper-2); color: var(--ink); }
 .product-image.cat-interactive { background: var(--accent-deep); color: var(--on-accent); }
 .product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; gap: 1rem; }
-/* En la tarjeta, el pie (precio y stock) se alinea abajo aunque el nombre ocupe dos líneas. */
 .product { display: flex; flex-direction: column; }
 .product > .product-footer { margin-top: auto; padding-top: 0.75rem; }
 .price { font-family: var(--font-display); font-size: 1.4rem; }
@@ -103,7 +100,7 @@ main { grid-area: main; overflow-y: auto; padding: 1.5rem; }
 
 .backdrop { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 10; padding: 1rem; }
 .modal { position: relative; background: var(--paper-3); border: 6px solid var(--white); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 1.25rem; width: min(520px, 100%); max-height: 90vh; overflow-y: auto; }
-.modal:focus-visible { outline: none; } /* el foco entra en el diálogo por código, no hace falta marcarlo */
+.modal:focus-visible { outline: none; } /* foco programático al abrir */
 .modal h2 { font-size: 1.75rem; margin-bottom: 0.5rem; }
 .close { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--paper-3); font-size: 1.4rem; line-height: 1; min-width: 2.75rem; min-height: 2.75rem; padding: 0; }
 .specs { list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: 0.3rem; }
@@ -160,7 +157,7 @@ main { grid-area: main; overflow-y: auto; padding: 1.5rem; }
   .chat { border-left: none; border-top: 2px dashed var(--rule); }
 }
 
-/* --- Quien prefiere menos movimiento: sin animaciones ni inclinación al pasar el ratón --- */
+/* --- Movimiento reducido --- */
 @media (prefers-reduced-motion: reduce) {
   .product { transition: none; }
   .product:hover { translate: none; rotate: var(--tilt, 0deg); }

@@ -1,9 +1,5 @@
-// Implementación del contrato AuthService con sesión en cookie httpOnly.
-//
-// El backend guarda la sesión (un JWT firmado) en una cookie que el JavaScript
-// NO puede leer. Por eso aquí no se guarda ningún token: el navegador manda la
-// cookie solo en cada petición a /api. Para saber si hay sesión se pregunta a
-// /auth/me, y para cerrarla se pide al servidor que borre la cookie.
+// AuthService con sesión en cookie httpOnly: el cliente nunca maneja el token.
+// La sesión se consulta en /auth/me y la cierra el servidor.
 
 import type { AuthService } from './authService'
 import { ApiError, http, setUnauthorizedHandler } from './httpClient'
@@ -12,7 +8,6 @@ import type { User } from './types'
 export function createCookieAuthService(): AuthService {
   const listeners = new Set<() => void>()
 
-  // Un 401 en mitad de la sesión (cookie caducada) → se avisa a quien escuche.
   setUnauthorizedHandler(() => listeners.forEach((listener) => listener()))
 
   return {
@@ -20,7 +15,7 @@ export function createCookieAuthService(): AuthService {
       try {
         return await http.get<User>('/auth/me')
       } catch (err) {
-        if (err instanceof ApiError && err.status === 401) return null // no hay sesión
+        if (err instanceof ApiError && err.status === 401) return null
         throw err
       }
     },
@@ -32,7 +27,7 @@ export function createCookieAuthService(): AuthService {
       await http.post<void>('/auth/logout', {})
     },
 
-    getAuthHeaders: () => ({}), // nada: la cookie la pone el navegador
+    getAuthHeaders: () => ({}), // la cookie la envía el navegador
 
     onSessionExpired(listener) {
       listeners.add(listener)

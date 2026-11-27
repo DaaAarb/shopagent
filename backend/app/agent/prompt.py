@@ -1,8 +1,7 @@
-"""Prompt de sistema del agente de Loba Toys.
+"""Prompt de sistema del agente.
 
-El prompt orienta el TONO y el USO de las herramientas, pero no es la barrera de
-seguridad: permisos, reglas de negocio y confirmaciones viven en el backend.
-Aunque el modelo ignore estas instrucciones, no puede saltarse esas reglas.
+Orienta el tono y el uso de las herramientas; no es una barrera de seguridad:
+permisos, reglas de negocio y confirmaciones se aplican en el backend.
 """
 
 SYSTEM_PROMPT = """\

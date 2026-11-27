@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 
 type Mode = 'login' | 'register'
 
-// Cuentas de prueba que crea backend/scripts/seed.py (datos ficticios).
+// Cuentas de demo creadas por backend/scripts/seed.py.
 const DEMO_PASSWORD = 'loba1234'
 const DEMO_ACCOUNTS = [
   { name: 'Lucía', email: 'lucia@example.com' },
@@ -12,7 +12,6 @@ const DEMO_ACCOUNTS = [
   { name: 'Sofía', email: 'sofia@example.com' },
 ]
 
-/** Pantalla de acceso. Solo habla con useAuth(): no sabe cómo se guarda la sesión. */
 export function LoginPage() {
   const { login, register, expired } = useAuth()
   const [mode, setMode] = useState<Mode>('login')
@@ -29,7 +28,7 @@ export function LoginPage() {
     try {
       if (mode === 'login') await login({ email, password })
       else await register({ name, email, password })
-      // Si va bien, este componente desaparece (App pinta la tienda): no se toca su estado.
+      // Si va bien, App desmonta este componente: no se actualiza su estado.
     } catch (err) {
       setError((err as Error).message)
       setSending(false)
@@ -80,7 +79,7 @@ export function LoginPage() {
             <input
               required
               type="password"
-              // Mismo mínimo que el backend (que es quien de verdad lo comprueba).
+              // Mismo mínimo que valida el backend.
               minLength={mode === 'register' ? 8 : undefined}
               maxLength={128}
               value={password}

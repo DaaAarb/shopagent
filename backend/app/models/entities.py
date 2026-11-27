@@ -5,9 +5,8 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from app.models.enums import DogSize, OrderStatus, ProductCategory
 
-# Nota: los modelos table=True NO validan al crearse (un Field(ge=0) no haría nada).
-# La validación vive en los esquemas de entrada (api/) y en services/.
-# El dinero siempre en céntimos (int): los float no representan bien el dinero.
+# Los modelos table=True no validan al instanciarse: la validación vive en los DTOs
+# y en services/. Los importes van en céntimos (int).
 
 
 def _utcnow() -> datetime:
@@ -19,9 +18,9 @@ class User(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     name: str
-    # Siempre en minúsculas (lo normaliza el DTO de entrada): un email, una cuenta.
+    # En minúsculas: lo normaliza el DTO de entrada.
     email: str = Field(unique=True, index=True)
-    # Hash argon2, nunca la contraseña. Ningún DTO de salida lo expone.
+    # Ningún DTO de salida lo expone.
     password_hash: str
 
 
@@ -29,7 +28,6 @@ class Product(SQLModel, table=True):
     """Juguete del catálogo (máximo 8). Sin tallas ni variantes."""
 
     id: int | None = Field(default=None, primary_key=True)
-    # Identificador legible para URLs: /products/pelota-saltarina
     slug: str = Field(unique=True, index=True)
     name: str
     category: ProductCategory
@@ -39,16 +37,14 @@ class Product(SQLModel, table=True):
     material: str
     dog_size: DogSize
     image_url: str | None = None
-    # Modelo 3D opcional (.glb); no todos los juguetes lo tienen.
     model_url: str | None = None
 
 
 class Order(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    # Indexado: casi todas las consultas filtran por el dueño del pedido.
     user_id: int = Field(foreign_key="user.id", index=True)
     status: OrderStatus = Field(default=OrderStatus.PENDING)
-    # Se guarda (no solo se calcula) para que el histórico no cambie nunca.
+    # Persistido: el histórico no depende del catálogo.
     total_cents: int
     shipping_address: str
     created_at: datetime = Field(default_factory=_utcnow, sa_type=DateTime(timezone=True))
@@ -63,8 +59,7 @@ class OrderItem(SQLModel, table=True):
     order_id: int = Field(foreign_key="order.id", index=True)
     product_id: int = Field(foreign_key="product.id")
     quantity: int
-    # Precio copiado del producto al comprar: si el catálogo cambia de precio
-    # mañana, los pedidos antiguos siguen mostrando lo que se pagó.
+    # Copiado del producto al comprar: los pedidos antiguos conservan lo que se pagó.
     unit_price_cents: int
 
     order: Order | None = Relationship(back_populates="items")
@@ -76,7 +71,6 @@ class Ticket(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
-    # Opcional: hay consultas que no son sobre un pedido concreto.
     order_id: int | None = Field(default=None, foreign_key="order.id")
     subject: str
     description: str

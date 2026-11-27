@@ -1,12 +1,4 @@
-"""Primitivas de seguridad: hash de contraseñas y tokens de sesión (JWT).
-
-Funciones puras, sin FastAPI ni base de datos: fáciles de probar y de reutilizar.
-
-- Contraseñas: argon2 (vía pwdlib). Lento A PROPÓSITO y con sal aleatoria: si se
-  filtrara la tabla de usuarios, adivinar cada contraseña costaría muchísimo.
-- Sesión: un JWT firmado con SECRET_KEY (HS256) que dice "soy el usuario N" y
-  caduca. La firma impide modificarlo: cambiar el `sub` invalida el token.
-"""
+"""Hash de contraseñas (argon2id) y tokens de sesión (JWT HS256 firmado con SECRET_KEY)."""
 
 from datetime import UTC, datetime, timedelta
 
@@ -15,12 +7,11 @@ from pwdlib import PasswordHash
 
 from app.config import get_settings
 
-_hasher = PasswordHash.recommended()  # argon2id con parámetros recomendados
+_hasher = PasswordHash.recommended()
 _ALGORITHM = "HS256"
 
-# Hash de una contraseña cualquiera. Se usa cuando el email no existe para tardar
-# lo mismo que con uno real: así no se puede averiguar qué emails están registrados
-# midiendo el tiempo de respuesta.
+# Se verifica contra este hash cuando el usuario no existe, para que el tiempo de
+# respuesta no revele qué emails están registrados.
 _DUMMY_HASH = _hasher.hash("contraseña-de-relleno")
 
 
@@ -48,7 +39,7 @@ def _secret() -> str:
 def create_session_token(user_id: int) -> str:
     now = datetime.now(UTC)
     payload = {
-        "sub": str(user_id),  # el estándar JWT pide que `sub` sea texto
+        "sub": str(user_id),  # RFC 7519: `sub` es una cadena
         "iat": now,
         "exp": now + timedelta(minutes=get_settings().session_minutes),
     }
@@ -58,8 +49,8 @@ def create_session_token(user_id: int) -> str:
 def read_session_token(token: str) -> int:
     """Devuelve el user_id del token o lanza InvalidToken."""
     try:
-        # `algorithms` explícito: evita ataques que cambian el algoritmo del token ("none").
+        # Algoritmo fijado: evita ataques de confusión de algoritmo (p. ej. "none").
         payload = jwt.decode(token, _secret(), algorithms=[_ALGORITHM], options={"require": ["exp", "sub"]})
         return int(payload["sub"])
-    except (jwt.InvalidTokenError, ValueError) as exc:  # incluye caducado y firma inválida
+    except (jwt.InvalidTokenError, ValueError) as exc:
         raise InvalidToken() from exc

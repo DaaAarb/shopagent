@@ -13,5 +13,5 @@ export interface AuthState {
   logout(): Promise<void>
 }
 
-// null = se está usando fuera de <AuthProvider> (useAuth lo detecta y avisa).
+// null fuera de <AuthProvider>; useAuth lo detecta.
 export const AuthContext = createContext<AuthState | null>(null)

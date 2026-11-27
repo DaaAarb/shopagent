@@ -1,4 +1,4 @@
-"""Dependencias de FastAPI: lo que las rutas reciben "inyectado"."""
+"""Dependencias de FastAPI: sesión, usuario actual, servicios y agente."""
 
 from functools import lru_cache
 from typing import Annotated
@@ -23,8 +23,7 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 
 def get_uow(session: SessionDep) -> UnitOfWork:
-    # FastAPI reutiliza el resultado de una dependencia dentro de la misma petición:
-    # todos los servicios de una petición comparten esta unidad de trabajo (y su sesión).
+    # FastAPI cachea la dependencia por petición: todos los servicios comparten esta UoW.
     return UnitOfWork(session)
 
 
@@ -38,18 +37,14 @@ def get_current_user_id(
     uow: UnitOfWorkDep,
     session: Annotated[str | None, Cookie(alias=SESSION_COOKIE)] = None,
 ) -> int:
-    """Quién llama, según la cookie de sesión (un JWT firmado; ver app/security.py).
-
-    El resto del backend (servicios, agente) recibe un `user_id` ya comprobado y
-    no sabe de dónde sale: cambiar el mecanismo de sesión solo toca esta función.
-    """
+    """`user_id` de la cookie de sesión. El resto del backend no conoce el mecanismo de sesión."""
     if session is None:
-        raise NotAuthenticated()  # → 401 (ver api/errors.py)
+        raise NotAuthenticated()
     try:
         user_id = read_session_token(session)
     except InvalidToken:
         raise NotAuthenticated() from None
-    UserService(uow).get_user(user_id)  # el usuario pudo borrarse tras emitir el token
+    UserService(uow).get_user(user_id)  # pudo borrarse después de emitir el token
     return user_id
 
 
@@ -86,9 +81,8 @@ UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 
 # --- Agente ---------------------------------------------------------------------------
-# El cliente de Gemini y la conexión a Redis se crean UNA vez (lru_cache) y se
-# reutilizan en todas las peticiones. En los tests se sustituyen con
-# app.dependency_overrides por un LLM falso y un historial en memoria.
+# Cliente de Gemini y conexión a Redis compartidos entre peticiones. Los tests los
+# sustituyen con app.dependency_overrides.
 
 
 @lru_cache
@@ -99,13 +93,12 @@ def _gemini_client(api_key: str, model: str) -> GeminiClient:
 def get_llm() -> LLMClient:
     settings = get_settings()
     if not settings.gemini_api_key:
-        raise LLMError("Falta GEMINI_API_KEY en el .env.")  # → 503
+        raise LLMError("Falta GEMINI_API_KEY en el .env.")
     return _gemini_client(settings.gemini_api_key, settings.llm_model)
 
 
 @lru_cache
 def _redis() -> Redis:
-    # Redis.from_url no conecta todavía: abre la conexión en el primer comando.
     return Redis.from_url(get_settings().redis_url, socket_connect_timeout=2)
 
 

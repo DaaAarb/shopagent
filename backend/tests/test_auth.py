@@ -25,7 +25,7 @@ def test_register_creates_account_and_starts_session(client):
 
     assert response.status_code == 201
     assert response.json()["email"] == "carol@example.com"
-    # El TestClient guarda la cookie como un navegador: la siguiente petición va autenticada.
+    # El TestClient conserva la cookie entre peticiones.
     assert client.get("/auth/me").json()["name"] == "Carol"
 
 
@@ -72,7 +72,7 @@ def test_login_sets_httponly_session_cookie(client, alice):
     assert cookie.startswith(f"{SESSION_COOKIE}=")
     assert "httponly" in cookie
     assert "samesite=lax" in cookie
-    # El token NO va en el cuerpo: el JavaScript del frontend no llega a verlo.
+    # El token no va en el cuerpo de la respuesta.
     assert "token" not in response.text
 
 

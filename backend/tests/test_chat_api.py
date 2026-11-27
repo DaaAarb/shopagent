@@ -1,8 +1,4 @@
-"""Endpoints /chat y /chat/confirm, con LLM falso e historial en memoria.
-
-Lo que se prueba aquí es el cableado HTTP (cabeceras, códigos, JSON). La lógica
-del agente ya está cubierta en test_agent.py.
-"""
+"""Capa HTTP de /chat y /chat/confirm (la lógica del agente está en test_agent.py)."""
 
 import pytest
 

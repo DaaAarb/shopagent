@@ -10,10 +10,7 @@ from app.models import Order, OrderStatus
 
 
 class OrderLineCreate(BaseModel):
-    """Una línea del carrito: qué producto y cuántas unidades."""
-
     product_id: int = Field(gt=0)
-    # Tope por línea: evita cantidades absurdas (el stock real las rechazaría igual).
     quantity: int = Field(gt=0, le=99)
 
 
@@ -48,9 +45,10 @@ class OrderRead(BaseModel):
 
     @classmethod
     def from_entity(cls, order: Order) -> "OrderRead":
-        """Construcción a mano (no `from_attributes`) porque `product_name` no es un
-        atributo de la línea: hay que leerlo de su producto. Se llama dentro del
-        servicio, con la sesión abierta, para que las líneas se puedan cargar."""
+        """`product_name` sale del producto de cada línea, así que se construye a mano.
+
+        Debe llamarse con la sesión abierta para poder cargar las líneas.
+        """
         return cls(
             id=order.id,
             status=order.status,

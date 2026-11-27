@@ -27,24 +27,18 @@ from app.services import OrderService
 
 ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
 
-# Contraseña de los usuarios de los tests. Se hashea UNA vez: argon2 es lento a
-# propósito y hacerlo en cada test alargaría mucho la ejecución.
+# Se hashea una sola vez: argon2 es lento a propósito.
 TEST_PASSWORD = "contraseña-de-prueba"
 TEST_PASSWORD_HASH = hash_password(TEST_PASSWORD)
 
 
 @pytest.fixture(autouse=True)
 def secret_key(monkeypatch):
-    """Clave de firma fija para los tests (autouse: se aplica a todos).
-
-    Los tests no dependen del .env: así pasan igual en local y en CI.
-    `monkeypatch` deshace el cambio al terminar cada test.
-    """
+    """Clave de firma fija: los tests no dependen del .env."""
     monkeypatch.setattr(get_settings(), "secret_key", "clave-solo-para-tests")
 
 
 def alembic_config(connection) -> Config:
-    """Config de Alembic que reutiliza una conexión abierta (ver migrations/env.py)."""
     config = Config(str(ALEMBIC_INI))
     config.attributes["connection"] = connection
     return config
@@ -52,11 +46,7 @@ def alembic_config(connection) -> Config:
 
 @pytest.fixture(scope="session")
 def engine() -> Iterator[Engine]:
-    """Motor contra la BD de tests (TEST_DATABASE_URL), uno para toda la ejecución.
-
-    Al empezar se vacía el esquema y se aplican las migraciones: los tests
-    corren contra el mismo esquema que producción, no contra un create_all.
-    """
+    """BD de tests recreada con las migraciones (mismo esquema que producción)."""
     engine = create_engine(
         get_settings().test_database_url, connect_args={"connect_timeout": 5}
     )
@@ -80,13 +70,7 @@ def engine() -> Iterator[Engine]:
 
 @pytest.fixture
 def session(engine: Engine) -> Iterator[Session]:
-    """Sesión aislada por test: todo lo que haga se deshace al terminar.
-
-    Se abre una transacción externa y la sesión trabaja dentro de ella. Con
-    join_transaction_mode="create_savepoint", cada `commit()` de los servicios
-    es solo un SAVEPOINT; al acabar el test se revierte la transacción externa
-    y la BD queda vacía para el siguiente, sin recrear tablas.
-    """
+    """Sesión aislada: los `commit()` son SAVEPOINTs y todo se revierte al acabar el test."""
     with engine.connect() as connection:
         transaction = connection.begin()
         with Session(bind=connection, join_transaction_mode="create_savepoint") as session:
@@ -115,7 +99,6 @@ def bob(session: Session) -> User:
 
 @pytest.fixture
 def make_product(session: Session) -> Callable[..., Product]:
-    """Fábrica de productos. Cada llamada crea uno con slug distinto."""
     counter = 0
 
     def _make(price_cents: int = 649, stock: int = 10, **overrides) -> Product:
@@ -147,13 +130,7 @@ def ball(make_product) -> Product:
 
 @pytest.fixture
 def make_order(session: Session, ball: Product) -> Callable[..., Order]:
-    """Fixture "fábrica": devuelve una función para crear pedidos a medida.
-
-    Uso: `make_order(alice, status=OrderStatus.SHIPPED)` crea un pedido con
-    2 unidades de `ball`; `lines=[(producto, cantidad), ...]` para elegir otras.
-    Inserta directamente en la BD (no pasa por el checkout): sirve para
-    preparar escenarios, no para probar la creación de pedidos.
-    """
+    """Crea pedidos directamente en la BD (sin checkout) para preparar escenarios."""
 
     def _make(
         user: User,
@@ -182,11 +159,7 @@ def make_order(session: Session, ball: Product) -> Callable[..., Order]:
 
 @pytest.fixture
 def client(session: Session) -> Iterator[TestClient]:
-    """Cliente HTTP contra la app, usando la sesión aislada del test.
-
-    `app.dependency_overrides` sustituye `get_session` por la sesión del test:
-    inyección de dependencias en acción. Las rutas no cambian; solo lo que reciben.
-    """
+    """Cliente HTTP que usa la sesión aislada del test."""
     app.dependency_overrides[get_session] = lambda: session
     yield TestClient(app)
     app.dependency_overrides.clear()

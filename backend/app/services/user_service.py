@@ -4,7 +4,6 @@ from app.services.exceptions import UserNotFound
 
 
 class UserService:
-    """Consulta de usuarios: comprueba que el usuario de la sesión sigue existiendo."""
 
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow

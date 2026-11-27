@@ -1,14 +1,10 @@
-"""Tests de la API: HTTP de extremo a extremo contra la BD de tests (PostgreSQL).
-
-La fixture `client` (en conftest.py) inyecta la sesión aislada de cada test.
-"""
+"""API de pedidos y tickets de extremo a extremo contra PostgreSQL."""
 
 import pytest
 
 from app.models import OrderStatus
 from tests.helpers import as_user
 
-# La autenticación (login, cookie, tokens) se prueba en test_auth.py.
 
 
 # --- Pedidos ---------------------------------------------------------------------

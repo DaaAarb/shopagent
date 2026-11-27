@@ -13,7 +13,7 @@ interface Props {
 }
 
 export function Catalog({ onAdded }: Props) {
-  // Se carga el catálogo entero una vez y se filtra en el navegador: son 8 productos.
+  // Catálogo pequeño (8 productos): se carga entero y se filtra en el cliente.
   const { data: products, error, loading } = useApi(productService.list)
   const [category, setCategory] = useState<ProductCategory | null>(null)
   const [selected, setSelected] = useState<Product | null>(null)
